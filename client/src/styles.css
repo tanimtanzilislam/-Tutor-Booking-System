@@ -145,12 +145,25 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .auth-aside-note p { margin: 0; font-size: 12px; }
 .auth-card { max-width: 420px; padding-block: 28px; }
 .auth-card h2 { margin: 0 0 28px; font: 700 31px var(--serif); letter-spacing: -1px; }
+.auth-card > h1 { margin: 0 0 12px; font: 700 31px var(--serif); letter-spacing: -1px; }
 .auth-card form, .editor-card { display: grid; gap: 17px; }
 .auth-card form > label, .editor-card > label, .form-fields-two > label { display: grid; gap: 8px; color: var(--ink); font-size: 12px; font-weight: 700; }
 .auth-card input { min-height: 47px; padding: 0 13px; border: 1px solid #dfe7df; border-radius: 6px; background: white; font-size: 13px; }
 .optional { color: var(--muted); font-weight: 400; }
+.forgot-password-link { justify-self: end; margin-top: -9px; color: var(--green); font-size: 11px; font-weight: 700; text-decoration: none; }
+.forgot-password-link:hover { color: var(--ink); text-decoration: underline; }
+.auth-divider { display: flex; align-items: center; gap: 12px; margin-block: 19px 15px; color: #87938c; font-size: 10px; }
+.auth-divider::before, .auth-divider::after { height: 1px; flex: 1; background: var(--line); content: ""; }
+.google-login-button { display: flex; width: 100%; min-height: 46px; align-items: center; justify-content: center; gap: 11px; border: 1px solid #dfe5df; border-radius: 6px; background: white; color: #27332d; font-size: 12px; font-weight: 700; cursor: pointer; transition: background .18s ease, border-color .18s ease; }
+.google-login-button:hover { border-color: #b7c7b8; background: #fbfcfa; }
+.google-mark { color: #4285f4; font: 800 19px Arial, sans-serif; }
 .auth-switch { margin: 20px 0 0; color: var(--muted); font-size: 12px; }
 .auth-switch a { color: var(--green); font-weight: 700; text-decoration: none; }
+.auth-single { grid-template-columns: 1fr; justify-items: center; }
+.auth-single .auth-card { width: min(100%, 430px); padding: 36px; border: 1px solid var(--line); border-radius: 12px; background: white; }
+.auth-description { margin: 0 0 23px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+.callback-error-card { display: grid; gap: 17px; justify-items: start; }
+.callback-error-card h1 { margin: 0; font: 700 30px var(--serif); }
 
 .form-page, .content-page { min-height: 560px; padding-block: 70px 100px; }
 .form-page-intro { max-width: 670px; margin: 0 auto 30px; text-align: center; }
@@ -297,6 +310,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .auth-aside h1 { max-width: 440px; font-size: 38px; }
   .auth-aside-note { margin-top: 25px; }
   .auth-card { width: 100%; max-width: none; padding: 8px 3px; }
+  .auth-single .auth-card { width: 100%; padding: 24px 19px; }
   .form-page, .content-page { padding-block: 53px 70px; }
   .editor-card { padding: 21px 17px; }
   .form-fields-two { grid-template-columns: 1fr; }

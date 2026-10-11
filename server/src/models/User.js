@@ -4,8 +4,10 @@ const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true, maxlength: 80 },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    passwordHash: { type: String, required: true },
-    profileImage: { type: String, default: "" }
+    passwordHash: { type: String, default: null },
+    profileImage: { type: String, default: "" },
+    resetPasswordTokenHash: { type: String, default: undefined, select: false },
+    resetPasswordExpires: { type: Date, default: undefined, select: false }
   },
   { timestamps: true }
 );

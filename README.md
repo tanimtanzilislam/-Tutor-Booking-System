@@ -11,15 +11,20 @@ MediQueue is a MERN tutor-booking application with a React/Vite client and an Ex
 
 1. Copy `server/.env.example` to `server/.env`.
 2. Set `MONGODB_URI` and replace `JWT_SECRET` with a long, random secret.
-3. Install packages from the project root with `npm install`, then install the client and server packages with `npm install --prefix client` and `npm install --prefix server`.
-4. Start the client and API with `npm run dev`.
-5. Open the Vite URL shown in the terminal (normally `http://localhost:5173`).
+3. To enable Google sign-in, configure `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_CALLBACK_URL` from a Google OAuth web client. Register the callback URL in the Google Cloud OAuth client settings.
+4. To enable password reset emails, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, and `SMTP_FROM`. The password reset endpoint intentionally returns an error until SMTP is configured.
+5. Install packages from the project root with `npm install`, then install the client and server packages with `npm install --prefix client` and `npm install --prefix server`.
+6. Start the client and API with `npm run dev`.
+7. Open the Vite URL shown in the terminal (normally `http://localhost:5173`).
 
 The API allows the client origin in `CLIENT_ORIGIN` (default `http://localhost:5173`). The frontend proxies `/api` requests to `http://localhost:5000` during development.
+For local Google OAuth, register `http://localhost:5000/api/auth/google/callback` as an authorized redirect URI in your Google Cloud OAuth web client. Add the OAuth and SMTP values to your existing `server/.env`; do not replace its MongoDB connection or JWT secret.
 
 ## Implemented flows
 
 - Student registration, login, session restoration, and logout
+- Google OAuth login (requires Google OAuth credentials)
+- Password reset using one-time, expiring email links (requires SMTP credentials)
 - Public tutor search by subject
 - A home-page featured tutor section that retrieves up to six recent tutors using a MongoDB aggregation `$limit` stage
 - Tutor detail pages with weekly availability and one-hour booking

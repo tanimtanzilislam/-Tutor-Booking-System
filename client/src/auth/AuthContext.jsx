@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ApiError, api } from "../api.js";
 
 const AuthContext = createContext(null);
@@ -44,6 +44,22 @@ export function AuthProvider({ children }) {
     return result.user;
   }
 
+  const completeGoogleSignIn = useCallback(async (token) => {
+    localStorage.setItem("mediqueue-token", token);
+    try {
+      const result = await api("/auth/me");
+      localStorage.setItem("mediqueue-user", JSON.stringify(result.user));
+      setUser(result.user);
+      setError("");
+      return result.user;
+    } catch (requestError) {
+      localStorage.removeItem("mediqueue-token");
+      localStorage.removeItem("mediqueue-user");
+      setUser(null);
+      throw requestError;
+    }
+  }, []);
+
   function signOut() {
     localStorage.removeItem("mediqueue-token");
     localStorage.removeItem("mediqueue-user");
@@ -51,7 +67,7 @@ export function AuthProvider({ children }) {
   }
 
   const value = useMemo(
-    () => ({ user, loading, error, signIn, signOut }),
+    () => ({ user, loading, error, signIn, completeGoogleSignIn, signOut }),
     [user, loading, error]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
