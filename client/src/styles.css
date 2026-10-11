@@ -149,9 +149,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .auth-card form, .editor-card { display: grid; gap: 17px; }
 .auth-card form > label, .editor-card > label, .form-fields-two > label { display: grid; gap: 8px; color: var(--ink); font-size: 12px; font-weight: 700; }
 .auth-card input { min-height: 47px; padding: 0 13px; border: 1px solid #dfe7df; border-radius: 6px; background: white; font-size: 13px; }
+.password-hint { margin: -11px 0 -9px; color: var(--muted); font-size: 10px; line-height: 1.6; }
 .optional { color: var(--muted); font-weight: 400; }
-.forgot-password-link { justify-self: end; margin-top: -9px; color: var(--green); font-size: 11px; font-weight: 700; text-decoration: none; }
-.forgot-password-link:hover { color: var(--ink); text-decoration: underline; }
 .auth-divider { display: flex; align-items: center; gap: 12px; margin-block: 19px 15px; color: #87938c; font-size: 10px; }
 .auth-divider::before, .auth-divider::after { height: 1px; flex: 1; background: var(--line); content: ""; }
 .google-login-button { display: flex; width: 100%; min-height: 46px; align-items: center; justify-content: center; gap: 11px; border: 1px solid #dfe5df; border-radius: 6px; background: white; color: #27332d; font-size: 12px; font-weight: 700; cursor: pointer; transition: background .18s ease, border-color .18s ease; }
@@ -161,7 +160,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .auth-switch a { color: var(--green); font-weight: 700; text-decoration: none; }
 .auth-single { grid-template-columns: 1fr; justify-items: center; }
 .auth-single .auth-card { width: min(100%, 430px); padding: 36px; border: 1px solid var(--line); border-radius: 12px; background: white; }
-.auth-description { margin: 0 0 23px; color: var(--muted); font-size: 13px; line-height: 1.7; }
 .callback-error-card { display: grid; gap: 17px; justify-items: start; }
 .callback-error-card h1 { margin: 0; font: 700 30px var(--serif); }
 

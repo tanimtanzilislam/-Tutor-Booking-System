@@ -1,7 +1,15 @@
 import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { api } from "../api.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { ErrorMessage } from "../components/PageState.jsx";
+
+function passwordValidationError(password) {
+  if (password.length < 6) return "Password must be at least 6 characters.";
+  if (!/[A-Z]/.test(password)) return "Password must include at least one uppercase letter.";
+  if (!/[a-z]/.test(password)) return "Password must include at least one lowercase letter.";
+  return "";
+}
 
 export default function AuthPage({ mode }) {
   const isRegister = mode === "register";
@@ -14,12 +22,16 @@ export default function AuthPage({ mode }) {
       ? "Google sign-in could not be completed. Please try again or log in with your email."
       : ""
   ));
+  const [passwordError, setPasswordError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   if (user) return <Navigate to={location.state?.from || "/"} replace />;
 
   function update(event) {
     setValues((current) => ({ ...current, [event.target.name]: event.target.value }));
+    if (event.target.name === "password" && isRegister) {
+      setPasswordError(passwordValidationError(event.target.value));
+    }
   }
 
   function continueWithGoogle() {
@@ -29,11 +41,34 @@ export default function AuthPage({ mode }) {
 
   async function submit(event) {
     event.preventDefault();
-    setSubmitting(true);
     setError("");
+    if (isRegister) {
+      const validationError = passwordValidationError(values.password);
+      setPasswordError(validationError);
+      if (validationError) return;
+    }
+    if (!event.currentTarget.reportValidity()) return;
+
+    setSubmitting(true);
     try {
-      await signIn(isRegister ? "/auth/register" : "/auth/login", values);
-      navigate(location.state?.from || "/", { replace: true });
+      if (isRegister) {
+        await api("/auth/register", {
+          method: "POST",
+          body: JSON.stringify({
+            name: values.name,
+            email: values.email,
+            profileImage: values.profileImage,
+            password: values.password
+          })
+        });
+        navigate("/login", {
+          replace: true,
+          state: { notice: "Your account is ready. Log in to continue." }
+        });
+      } else {
+        await signIn("/auth/login", values);
+        navigate(location.state?.from || "/", { replace: true });
+      }
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -51,19 +86,27 @@ export default function AuthPage({ mode }) {
       </div>
       <div className="auth-card">
         <p className="section-kicker">{isRegister ? "Create your account" : "Your account"}</p>
-        <h2>{isRegister ? "Join MediQueue" : "Login"}</h2>
-        <form onSubmit={submit}>
+        <h2>{isRegister ? "Register" : "Login"}</h2>
+        {!isRegister && location.state?.notice && <p className="form-success" role="status">{location.state.notice}</p>}
+        <form onSubmit={submit} noValidate>
           {isRegister && (
-            <label>Full name<input name="name" value={values.name} onChange={update} autoComplete="name" required maxLength={80} /></label>
+            <label>Name<input name="name" value={values.name} onChange={update} autoComplete="name" required maxLength={80} /></label>
           )}
           <label>Email address<input name="email" type="email" value={values.email} onChange={update} autoComplete="email" required /></label>
-          <label>Password<input name="password" type="password" value={values.password} onChange={update} autoComplete={isRegister ? "new-password" : "current-password"} minLength={isRegister ? 8 : undefined} required /></label>
-          {!isRegister && <Link className="forgot-password-link" to="/forgot-password">Forgot password?</Link>}
+          <label>Password<input name="password" type="password" value={values.password} onChange={update} autoComplete={isRegister ? "new-password" : "current-password"} minLength={isRegister ? 6 : undefined} required /></label>
           {isRegister && (
-            <label>Profile image URL <span className="optional">(optional)</span><input name="profileImage" type="url" value={values.profileImage} onChange={update} placeholder="https://" /></label>
+            <>
+              <p className="password-hint">At least 6 characters, including an uppercase and a lowercase letter.</p>
+              <ErrorMessage>{passwordError}</ErrorMessage>
+            </>
+          )}
+          {isRegister && (
+            <label>Photo URL<input name="profileImage" type="url" value={values.profileImage} onChange={update} autoComplete="url" placeholder="https://" required /></label>
           )}
           <ErrorMessage>{error}</ErrorMessage>
-          <button className="button button-dark button-full" type="submit" disabled={submitting}>{submitting ? "Please wait..." : isRegister ? "Create account" : "Log in"}</button>
+          <button className="button button-dark button-full" type="submit" disabled={submitting}>
+            {submitting ? (isRegister ? "Registering..." : "Please wait...") : isRegister ? "Register" : "Log in"}
+          </button>
         </form>
         <div className="auth-divider"><span>or</span></div>
         <button className="google-login-button" type="button" onClick={continueWithGoogle}>
@@ -72,7 +115,7 @@ export default function AuthPage({ mode }) {
         </button>
         <p className="auth-switch">
           {isRegister ? "Already have an account?" : "New to MediQueue?"}{" "}
-          <Link to={isRegister ? "/login" : "/register"}>{isRegister ? "Log in" : "Create an account"}</Link>
+          <Link to={isRegister ? "/login" : "/register"}>{isRegister ? "Login" : "Register"}</Link>
         </p>
       </div>
     </section>
