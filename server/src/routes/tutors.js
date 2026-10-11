@@ -15,9 +15,15 @@ router.get("/featured", async (_req, res, next) => {
       {
         $project: {
           name: 1,
+          photoUrl: 1,
           subject: 1,
-          bio: 1,
+          institution: 1,
+          experience: 1,
+          location: 1,
+          teachingMode: 1,
           hourlyRate: 1,
+          totalSlots: 1,
+          sessionStartDate: 1,
           timeZone: 1,
           availability: 1
         }
@@ -58,23 +64,59 @@ router.get("/:tutorId", async (req, res, next) => {
 
 router.post("/", requireAuth, async (req, res, next) => {
   try {
-    const { name, subject, bio, hourlyRate, availability, timeZone } = req.body;
+    const {
+      name,
+      photoUrl,
+      subject,
+      institution,
+      experience,
+      location,
+      teachingMode,
+      hourlyRate,
+      totalSlots,
+      sessionStartDate,
+      availability,
+      timeZone
+    } = req.body;
     const rate = Number(hourlyRate);
+    const slotCount = Number(totalSlots);
+    const yearsExperience = Number(experience);
     if (
       typeof name !== "string" || !name.trim() ||
+      typeof photoUrl !== "string" || !photoUrl.trim() ||
       typeof subject !== "string" || !subject.trim() ||
-      typeof bio !== "string" || !bio.trim() ||
-      !Number.isFinite(rate) || rate <= 0
+      typeof institution !== "string" || !institution.trim() ||
+      typeof location !== "string" || !location.trim() ||
+      !Number.isFinite(yearsExperience) || yearsExperience < 0 || yearsExperience > 80 ||
+      !Number.isFinite(rate) || rate <= 0 ||
+      !Number.isInteger(slotCount) || slotCount < 1 || slotCount > 24 ||
+      !["Online", "Offline", "Both"].includes(teachingMode)
     ) {
-      return res.status(400).json({ message: "Provide a tutor name, subject, bio, and positive hourly rate." });
+      return res.status(400).json({ message: "Complete all tutor details with valid hourly fee, experience, and total slots." });
     }
-    if (!Array.isArray(availability) || availability.length === 0) {
-      return res.status(400).json({ message: "Add at least one weekly availability window." });
+    try {
+      const parsedPhotoUrl = new URL(photoUrl);
+      if (!["http:", "https:"].includes(parsedPhotoUrl.protocol)) throw new Error("Unsupported URL protocol");
+    } catch {
+      return res.status(400).json({ message: "Provide a valid HTTP or HTTPS tutor photo URL." });
     }
     if (typeof timeZone !== "string" || !DateTime.now().setZone(timeZone).isValid) {
       return res.status(400).json({ message: "Provide a valid tutor timezone." });
     }
-
+    if (typeof sessionStartDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(sessionStartDate)) {
+      return res.status(400).json({ message: "Choose a valid session start date." });
+    }
+    const parsedStartDate = DateTime.fromISO(sessionStartDate, { zone: timeZone });
+    if (
+      !parsedStartDate.isValid ||
+      parsedStartDate.toISODate() !== sessionStartDate ||
+      sessionStartDate < DateTime.now().setZone(timeZone).toISODate()
+    ) {
+      return res.status(400).json({ message: "Choose a valid session start date." });
+    }
+    if (!Array.isArray(availability) || availability.length === 0) {
+      return res.status(400).json({ message: "Add at least one weekly availability window." });
+    }
     const days = new Set();
     for (const window of availability) {
       if (
@@ -86,15 +128,28 @@ router.post("/", requireAuth, async (req, res, next) => {
       ) {
         return res.status(400).json({ message: "Each weekday must have one valid start/end availability window." });
       }
+      const startMinute = Number(window.startTime.slice(0, 2)) * 60 + Number(window.startTime.slice(3));
+      const endMinute = Number(window.endTime.slice(0, 2)) * 60 + Number(window.endTime.slice(3));
+      if (startMinute % 60 !== 0 || endMinute % 60 !== 0 || slotCount > (endMinute - startMinute) / 60) {
+        return res.status(400).json({
+          message: "Each daily availability window must fit the requested number of one-hour slots and start/end on the hour."
+        });
+      }
       days.add(window.dayOfWeek);
     }
 
     const tutor = await Tutor.create({
       createdBy: req.userId,
       name: name.trim(),
+      photoUrl: photoUrl.trim(),
       subject: subject.trim(),
-      bio: bio.trim(),
+      institution: institution.trim(),
+      experience: yearsExperience,
+      location: location.trim(),
+      teachingMode,
       hourlyRate: rate,
+      totalSlots: slotCount,
+      sessionStartDate,
       timeZone,
       availability
     });

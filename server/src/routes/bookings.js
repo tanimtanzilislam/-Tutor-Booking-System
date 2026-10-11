@@ -39,7 +39,13 @@ router.post("/", requireAuth, async (req, res, next) => {
     if (!isOnTutorLocalHour(start, tutor.timeZone)) {
       return res.status(400).json({ message: "Sessions must start on the hour." });
     }
-    if (!isStartWithinAvailability(start, tutor.timeZone, tutor.availability)) {
+    if (!isStartWithinAvailability(
+      start,
+      tutor.timeZone,
+      tutor.availability,
+      tutor.sessionStartDate,
+      tutor.totalSlots
+    )) {
       return res.status(409).json({ message: "That time is outside this tutor's weekly availability." });
     }
 

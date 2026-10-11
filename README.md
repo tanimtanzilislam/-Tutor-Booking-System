@@ -29,12 +29,12 @@ For local Google OAuth, register `http://localhost:5000/api/auth/google/callback
 - A home-page featured tutor section that retrieves up to six recent tutors using a MongoDB aggregation `$limit` stage
 - Tutor detail pages with weekly availability and one-hour booking
 - Homepage subject links that open the tutor directory with the subject filter applied
-- Authenticated tutor creation with a weekly availability window for each selected weekday
+- Authenticated tutor creation with photo URL, subject, institution, experience, location, teaching mode, hourly fee, start date, daily slot count, and weekly availability
 - One-hour bookings, checked against the tutor's recurring availability and existing bookings on the API
 - A unique session token for every booking
 - Authenticated profile and booked-session pages
 
-Tutor availability is saved in the timezone of the tutor's browser when the tutor is added. Available booking times are displayed in the student's browser timezone. A booking is accepted only if it starts on the hour, falls within the tutor's weekly availability, and does not overlap another booking.
+Tutor availability is saved in the timezone of the tutor's browser when the tutor is added. Available booking times are displayed in the student's browser timezone. A booking is accepted only if it starts on the hour, falls within the tutor's weekly availability and configured daily slots, is on or after the tutor's session start date, and does not overlap another booking. Each available weekday's schedule repeats weekly from the session start date.
 
 `My Tutors` is an authenticated placeholder because no additional behavior for that page was specified.
 

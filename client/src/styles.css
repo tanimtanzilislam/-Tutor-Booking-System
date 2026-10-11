@@ -111,6 +111,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .search-bar .button { min-height: 41px; padding-inline: 17px; }
 .tutor-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 .tutor-card { display: flex; min-width: 0; flex-direction: column; padding: 23px; border: 1px solid var(--line); border-radius: 11px; background: white; }
+.tutor-card-profile { display: flex; min-width: 0; align-items: center; gap: 14px; }
+.tutor-card-photo { width: 66px; height: 66px; flex: none; border-radius: 50%; object-fit: cover; background: #edf4e7; }
+.tutor-card-photo-fallback { display: grid; place-items: center; color: var(--green); font: 700 25px var(--serif); }
+.tutor-card-profile h2 { margin: 9px 0 3px; font: 700 18px var(--serif); letter-spacing: -.4px; }
+.tutor-institution { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+.tutor-card-price { margin-top: 18px; }
+.tutor-experience { color: var(--muted); font-size: 10px; }
 .tutor-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .subject-pill { display: inline-flex; width: fit-content; align-items: center; padding: 6px 9px; border-radius: 20px; background: #edf4e7; color: #427459; font-size: 10px; font-weight: 700; }
 .tutor-rate { color: var(--ink); font-size: 16px; font-weight: 700; white-space: nowrap; }
@@ -167,7 +174,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .form-page-intro { max-width: 670px; margin: 0 auto 30px; text-align: center; }
 .form-page-intro > p:last-child { margin-top: 13px; }
 .editor-card { max-width: 760px; margin-inline: auto; padding: 30px; border: 1px solid var(--line); border-radius: 12px; background: white; }
+.tutor-editor { max-width: 850px; }
 .form-fields-two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.editor-card select { min-height: 43px; padding: 0 11px; border: 1px solid #dfe7df; border-radius: 6px; background: white; color: var(--ink); font-size: 12px; }
+.tutor-photo-preview { display: flex; align-items: center; gap: 12px; }
+.tutor-photo-preview img { width: 88px; height: 88px; border: 1px solid var(--line); border-radius: 10px; object-fit: cover; }
 .editor-card textarea { padding: 12px; resize: vertical; }
 .availability-editor { margin: 4px 0 0; padding: 19px; border: 1px solid var(--line); border-radius: 8px; }
 .availability-editor legend { padding-inline: 7px; font: 700 14px var(--serif); }
@@ -235,9 +246,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .back-link:hover { color: var(--ink); }
 .tutor-details-grid { display: grid; grid-template-columns: 1.25fr .75fr; align-items: start; gap: 24px; }
 .tutor-detail-card, .session-booking-card { padding: clamp(23px, 4vw, 38px); border: 1px solid var(--line); border-radius: 12px; background: white; }
+.tutor-detail-photo { width: 116px; height: 116px; margin-top: 27px; border-radius: 14px; object-fit: cover; background: #edf4e7; }
 .detail-kicker { margin: 34px 0 8px; color: var(--green); }
 .tutor-detail-card h1 { margin: 0; font: 700 clamp(32px, 4vw, 46px)/1.15 var(--serif); letter-spacing: -1.8px; }
 .tutor-detail-bio { max-width: 650px; margin: 15px 0 25px; color: var(--muted); font-size: 14px; line-height: 1.8; white-space: pre-wrap; }
+.tutor-profile-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 11px 20px; margin-block: 21px; }
+.tutor-profile-facts p { display: grid; gap: 4px; margin: 0; color: var(--ink); font-size: 12px; font-weight: 600; }
+.tutor-profile-facts p span { color: var(--muted); font-size: 10px; font-weight: 400; }
 .detail-facts { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding-block: 14px; border-block: 1px solid #edf0eb; }
 .detail-facts > div { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: 12px; font-weight: 600; }
 .detail-facts p { margin: 0; color: var(--muted); font-size: 11px; text-align: right; }
@@ -312,6 +327,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .form-page, .content-page { padding-block: 53px 70px; }
   .editor-card { padding: 21px 17px; }
   .form-fields-two { grid-template-columns: 1fr; }
+  .tutor-profile-facts { grid-template-columns: 1fr 1fr; }
   .availability-editor { padding: 14px 9px; }
   .availability-row { grid-template-columns: .8fr 1.2fr; padding-inline: 4px; }
   .session-card { grid-template-columns: 58px 1fr; gap: 12px; padding: 13px; }

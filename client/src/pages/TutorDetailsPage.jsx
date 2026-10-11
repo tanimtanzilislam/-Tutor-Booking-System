@@ -74,9 +74,18 @@ export default function TutorDetailsPage() {
             <span className="subject-pill">{tutor.subject}</span>
             <span className="tutor-rate">${tutor.hourlyRate}<small> / hour</small></span>
           </div>
+          {tutor.photoUrl && <img className="tutor-detail-photo" src={tutor.photoUrl} alt={`${tutor.name} profile`} />}
           <p className="section-kicker detail-kicker">Meet your tutor</p>
           <h1>{tutor.name}</h1>
-          <p className="tutor-detail-bio">{tutor.bio}</p>
+          <div className="tutor-profile-facts">
+            <p><span>Institution</span>{tutor.institution}</p>
+            <p><span>Experience</span>{tutor.experience} years</p>
+            <p><span>Location</span>{tutor.location}</p>
+            <p><span>Teaching mode</span>{tutor.teachingMode}</p>
+            <p><span>Session start date</span>{tutor.sessionStartDate || "Available now"}</p>
+            <p><span>Slots per available day</span>{tutor.totalSlots ?? "Varies by schedule"}</p>
+          </div>
+          {tutor.bio && <p className="tutor-detail-bio">{tutor.bio}</p>}
           <div className="detail-facts">
             <div><span className="availability-dot" /><span>Weekly availability</span></div>
             <p>{tutor.timeZone}</p>
@@ -97,7 +106,7 @@ export default function TutorDetailsPage() {
         <aside className="session-booking-card">
           <p className="section-kicker">Make it official</p>
           <h2>Book a session</h2>
-          <p className="booking-intro">Choose a one-hour time that works for you. Available times are shown in your local timezone.</p>
+          <p className="booking-intro">Choose one of the tutor’s one-hour sessions. Available times are shown in your local timezone.</p>
           <form className="booking-form detail-booking-form" onSubmit={bookSession}>
             <label htmlFor="session-time">Available sessions</label>
             {choices.length ? (

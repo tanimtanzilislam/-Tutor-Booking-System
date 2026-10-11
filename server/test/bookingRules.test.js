@@ -27,6 +27,17 @@ test("uses the tutor timezone when determining the weekday", () => {
   assert.equal(isStartWithinAvailability(utcMondayMorning, timezone, mondayMorning), true);
 });
 
+test("limits daily bookable appointments to the tutor's configured total slots", () => {
+  assert.equal(isStartWithinAvailability(tutorLocalStart(12, 9), timezone, mondayMorning, "2026-10-12", 2), true);
+  assert.equal(isStartWithinAvailability(tutorLocalStart(12, 10), timezone, mondayMorning, "2026-10-12", 2), true);
+  assert.equal(isStartWithinAvailability(tutorLocalStart(12, 11), timezone, mondayMorning, "2026-10-12", 2), false);
+});
+
+test("does not offer a recurring weekday before the session start date", () => {
+  assert.equal(isStartWithinAvailability(tutorLocalStart(12, 10), timezone, mondayMorning, "2026-10-13", 3), false);
+  assert.equal(isStartWithinAvailability(tutorLocalStart(19, 10), timezone, mondayMorning, "2026-10-13", 3), true);
+});
+
 test("treats one-hour sessions that touch at the boundary as non-conflicting", () => {
   const first = new Date("2026-10-12T08:00:00.000Z");
   const next = new Date("2026-10-12T09:00:00.000Z");
