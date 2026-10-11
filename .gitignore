@@ -3,6 +3,12 @@ node_modules/
 client/dist/
 client/node_modules/
 .client-git-metadata-backup/
-server/.env
-.env
+.env*
+**/.env*
+!.env.example
+!**/.env.example
+.history/
+**/.history/
+*.env_*
+**/*.env_*
 *.log
