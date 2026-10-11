@@ -189,6 +189,60 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .not-found { min-height: 560px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
+.available-tutors-section { padding-block: 86px 96px; }
+.section-heading-row { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 29px; }
+.section-heading-row .section-kicker { margin-bottom: 10px; color: var(--green); }
+.section-heading-row h2, .subject-explore-inner h2, .session-prep-heading h2 { max-width: 590px; margin: 0; font: 600 clamp(29px, 3.5vw, 40px)/1.2 var(--serif); letter-spacing: -1.5px; }
+.section-heading-row > div > p:last-child, .subject-explore-inner > div:first-child > p:last-child, .session-prep-heading > p:last-child { margin: 11px 0 0; color: var(--muted); font-size: 13px; line-height: 1.75; }
+.text-link { flex: none; padding-bottom: 4px; color: var(--green); font-size: 12px; font-weight: 700; text-decoration: none; }
+.text-link span { margin-left: 5px; }
+.text-link:hover { color: var(--ink); }
+.tutor-card-action { margin-top: 20px; }
+.featured-empty-state { display: flex; align-items: center; gap: 18px; padding: 22px; border: 1px solid var(--line); border-radius: 10px; background: white; }
+.featured-empty-state > div { flex: 1; }
+.featured-empty-state h3 { margin: 0 0 5px; font: 700 16px var(--serif); }
+.featured-empty-state p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.subject-explore-section { padding-block: 73px; background: #eaf0e5; }
+.subject-explore-inner { display: grid; grid-template-columns: .9fr 1fr; align-items: center; gap: 9%; }
+.subject-explore-inner .section-kicker, .session-prep-heading .section-kicker { margin-bottom: 12px; color: var(--green); }
+.subject-links { display: flex; flex-wrap: wrap; gap: 10px; }
+.subject-links a { display: inline-flex; min-height: 43px; align-items: center; gap: 12px; padding: 0 14px; border: 1px solid #cddbc9; border-radius: 24px; background: #f8f9f5; color: var(--ink); font-size: 12px; font-weight: 600; text-decoration: none; transition: border-color .18s ease, transform .18s ease; }
+.subject-links a:hover { transform: translateY(-1px); border-color: #82a98c; }
+.subject-links a span { color: var(--green); }
+.session-prep-section { padding-block: 89px; background: #f0f3ed; }
+.session-prep-inner { display: grid; grid-template-columns: .8fr 1.2fr; align-items: start; gap: 9%; }
+.session-prep-heading { max-width: 430px; }
+.prep-cards { display: grid; grid-template-columns: 1fr; }
+.prep-cards article { display: grid; grid-template-columns: 37px 1fr; column-gap: 14px; padding-block: 15px; border-bottom: 1px solid #dce4da; }
+.prep-cards article:first-child { padding-top: 3px; }
+.prep-cards article:last-child { border-bottom: 0; }
+.prep-cards article > span { grid-row: span 2; padding-top: 3px; color: var(--green); font-size: 10px; font-weight: 700; letter-spacing: 1px; }
+.prep-cards h3 { margin: 0; font: 700 15px var(--serif); }
+.prep-cards p { margin: 5px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.tutor-details-page { min-height: 570px; padding-block: 38px 94px; }
+.back-link { display: inline-block; margin-bottom: 22px; color: var(--green); font-size: 12px; font-weight: 700; text-decoration: none; }
+.back-link:hover { color: var(--ink); }
+.tutor-details-grid { display: grid; grid-template-columns: 1.25fr .75fr; align-items: start; gap: 24px; }
+.tutor-detail-card, .session-booking-card { padding: clamp(23px, 4vw, 38px); border: 1px solid var(--line); border-radius: 12px; background: white; }
+.detail-kicker { margin: 34px 0 8px; color: var(--green); }
+.tutor-detail-card h1 { margin: 0; font: 700 clamp(32px, 4vw, 46px)/1.15 var(--serif); letter-spacing: -1.8px; }
+.tutor-detail-bio { max-width: 650px; margin: 15px 0 25px; color: var(--muted); font-size: 14px; line-height: 1.8; white-space: pre-wrap; }
+.detail-facts { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding-block: 14px; border-block: 1px solid #edf0eb; }
+.detail-facts > div { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: 12px; font-weight: 600; }
+.detail-facts p { margin: 0; color: var(--muted); font-size: 11px; text-align: right; }
+.weekly-availability { margin-top: 26px; }
+.weekly-availability h2, .session-booking-card h2 { margin: 0 0 14px; font: 700 18px var(--serif); letter-spacing: -.4px; }
+.weekly-window { display: flex; justify-content: space-between; gap: 15px; padding-block: 11px; border-bottom: 1px solid #edf0eb; color: var(--muted); font-size: 12px; }
+.weekly-window:last-child { border-bottom: 0; }
+.weekly-window span:first-child { color: var(--ink); font-weight: 600; }
+.session-booking-card { position: sticky; top: 105px; }
+.session-booking-card .section-kicker { margin-bottom: 10px; color: var(--green); }
+.session-booking-card h2 { margin-bottom: 8px; font-size: 23px; }
+.booking-intro { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.detail-booking-form { gap: 13px; margin-top: 23px; padding-top: 0; border-top: 0; }
+.detail-booking-form > label { font-size: 12px; }
+.inline-token { color: #315b49; font: 700 11px "DM Sans", sans-serif; letter-spacing: .5px; }
+
 @media (max-width: 1050px) {
   .navbar { gap: 15px; }
   .nav-links { gap: 14px; }
@@ -220,6 +274,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .steps-grid { grid-template-columns: 1fr; gap: 0; margin-top: 42px; }
   .steps-grid article { padding-block: 19px; border-bottom: 1px solid var(--line); }
   .steps-grid h3 { margin-top: 10px; }
+  .available-tutors-section { padding-block: 65px; }
+  .section-heading-row { align-items: flex-start; flex-direction: column; gap: 14px; }
+  .featured-empty-state { align-items: flex-start; flex-wrap: wrap; }
+  .featured-empty-state > div { min-width: calc(100% - 75px); }
+  .subject-explore-section, .session-prep-section { padding-block: 61px; }
+  .subject-explore-inner, .session-prep-inner { grid-template-columns: 1fr; gap: 27px; }
+  .tutor-details-page { padding-block: 26px 65px; }
+  .tutor-details-grid { grid-template-columns: 1fr; }
+  .session-booking-card { position: static; }
   .home-cta-inner { align-items: flex-start; flex-direction: column; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px 24px; }
   .footer-about { grid-column: 1 / -1; }

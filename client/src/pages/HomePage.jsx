@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { api } from "../api.js";
+import TutorCard from "../components/TutorCard.jsx";
+import { ErrorMessage, Loading } from "../components/PageState.jsx";
 
 const slides = [
   {
@@ -27,13 +30,26 @@ const slides = [
 
 export default function HomePage() {
   const [active, setActive] = useState(0);
+  const [tutors, setTutors] = useState([]);
+  const [tutorsLoading, setTutorsLoading] = useState(true);
+  const [tutorsError, setTutorsError] = useState("");
 
   useEffect(() => {
     const timer = window.setInterval(() => setActive((index) => (index + 1) % slides.length), 7000);
     return () => window.clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    let current = true;
+    api("/tutors/featured")
+      .then(({ tutors: result }) => { if (current) setTutors(result); })
+      .catch((requestError) => { if (current) setTutorsError(requestError.message); })
+      .finally(() => { if (current) setTutorsLoading(false); });
+    return () => { current = false; };
+  }, []);
+
   const slide = slides[active];
+  const subjects = [...new Set(tutors.map((tutor) => tutor.subject))];
   return (
     <>
       <section className="hero shell" aria-label="Featured learning stories">
@@ -63,6 +79,51 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="available-tutors-section shell" aria-labelledby="available-tutors-heading">
+        <div className="section-heading-row">
+          <div>
+            <p className="section-kicker">Start somewhere good</p>
+            <h2 id="available-tutors-heading">Available tutors</h2>
+            <p>Meet tutors ready to help you take your next step.</p>
+          </div>
+          <Link className="text-link" to="/tutors">Browse all tutors <span aria-hidden="true">↗</span></Link>
+        </div>
+        {tutorsError ? <ErrorMessage>{tutorsError}</ErrorMessage> : tutorsLoading ? (
+          <Loading label="Finding available tutors..." />
+        ) : tutors.length ? (
+          <div className="tutor-grid featured-tutor-grid">
+            {tutors.map((tutor) => <TutorCard key={tutor._id} tutor={tutor} />)}
+          </div>
+        ) : (
+          <div className="featured-empty-state">
+            <span className="empty-icon">✳</span>
+            <div><h3>New tutors are on their way</h3><p>Check the tutor directory again soon to see who’s available.</p></div>
+            <Link className="button button-dark" to="/tutors">Explore tutors</Link>
+          </div>
+        )}
+      </section>
+
+      <section className="subject-explore-section">
+        <div className="shell subject-explore-inner">
+          <div>
+            <p className="section-kicker">Follow your curiosity</p>
+            <h2>Find help in a subject that matters to you.</h2>
+            <p>Start with a subject, then choose a tutor whose weekly schedule works for you.</p>
+          </div>
+          {subjects.length ? (
+            <div className="subject-links" aria-label="Subjects offered by available tutors">
+              {subjects.map((subject) => (
+                <Link key={subject} to={`/tutors?subject=${encodeURIComponent(subject)}`}>
+                  {subject}<span aria-hidden="true">↗</span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <Link className="button button-dark" to="/tutors">Browse all subjects</Link>
+          )}
+        </div>
+      </section>
+
       <section className="intro-section shell" id="how-it-works">
         <div className="section-kicker">A clearer way to learn</div>
         <div className="intro-grid">
@@ -73,6 +134,20 @@ export default function HomePage() {
           <article><span>01</span><h3>Find your subject</h3><p>Browse the tutor directory and filter for the help you need.</p></article>
           <article><span>02</span><h3>Choose a time</h3><p>See available one-hour sessions in your local timezone.</p></article>
           <article><span>03</span><h3>Keep your token</h3><p>Your booking confirmation includes a unique session token.</p></article>
+        </div>
+      </section>
+      <section className="session-prep-section">
+        <div className="shell session-prep-inner">
+          <div className="session-prep-heading">
+            <p className="section-kicker">Make it your hour</p>
+            <h2>A little preparation can open up a lot.</h2>
+            <p>Bring what you’re working on and your tutor can help you make the session count.</p>
+          </div>
+          <div className="prep-cards">
+            <article><span>01</span><h3>Pick one thing</h3><p>Think of a question, topic, or learning goal you’d like to focus on.</p></article>
+            <article><span>02</span><h3>Bring your questions</h3><p>Share where you feel stuck so you and your tutor can get started together.</p></article>
+            <article><span>03</span><h3>Keep your token handy</h3><p>Your booking confirmation gives you a unique token for your session.</p></article>
+          </div>
         </div>
       </section>
       <section className="home-cta">

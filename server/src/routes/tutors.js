@@ -1,10 +1,33 @@
 import { Router } from "express";
 import { DateTime } from "luxon";
+import mongoose from "mongoose";
 import Tutor from "../models/Tutor.js";
 import requireAuth from "../middleware/requireAuth.js";
 
 const router = Router();
 const timePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+
+router.get("/featured", async (_req, res, next) => {
+  try {
+    const tutors = await Tutor.aggregate([
+      { $sort: { createdAt: -1 } },
+      { $limit: 6 },
+      {
+        $project: {
+          name: 1,
+          subject: 1,
+          bio: 1,
+          hourlyRate: 1,
+          timeZone: 1,
+          availability: 1
+        }
+      }
+    ]);
+    return res.json({ tutors });
+  } catch (error) {
+    return next(error);
+  }
+});
 
 router.get("/", async (req, res, next) => {
   try {
@@ -15,6 +38,19 @@ router.get("/", async (req, res, next) => {
     }
     const tutors = await Tutor.find(filter).sort({ createdAt: -1 });
     return res.json({ tutors });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/:tutorId", async (req, res, next) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.tutorId)) {
+      return res.status(404).json({ message: "Tutor not found." });
+    }
+    const tutor = await Tutor.findById(req.params.tutorId);
+    if (!tutor) return res.status(404).json({ message: "Tutor not found." });
+    return res.json({ tutor });
   } catch (error) {
     return next(error);
   }

@@ -9,6 +9,7 @@ import MySessionsPage from "./pages/MySessionsPage.jsx";
 import MyTutorsPage from "./pages/MyTutorsPage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
+import TutorDetailsPage from "./pages/TutorDetailsPage.jsx";
 import TutorsPage from "./pages/TutorsPage.jsx";
 
 function Protected({ children }) {
@@ -26,6 +27,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="tutors" element={<TutorsPage />} />
+        <Route path="tutors/:tutorId" element={<TutorDetailsPage />} />
         <Route path="login" element={loading ? <Loading label="Restoring your session..." /> : <AuthPage mode="login" />} />
         <Route path="register" element={loading ? <Loading label="Restoring your session..." /> : <AuthPage mode="register" />} />
         <Route path="add-tutor" element={<Protected><AddTutorPage /></Protected>} />
