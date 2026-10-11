@@ -28,7 +28,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="tutors" element={<TutorsPage />} />
-        <Route path="tutors/:tutorId" element={<TutorDetailsPage />} />
+        <Route path="tutors/:tutorId" element={<Protected><TutorDetailsPage /></Protected>} />
         <Route path="login" element={loading ? <Loading label="Restoring your session..." /> : <AuthPage mode="login" />} />
         <Route path="register" element={loading ? <Loading label="Restoring your session..." /> : <AuthPage mode="register" />} />
         <Route path="auth/callback" element={<GoogleCallbackPage />} />

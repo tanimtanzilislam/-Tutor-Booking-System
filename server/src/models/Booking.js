@@ -4,8 +4,12 @@ const bookingSchema = new mongoose.Schema(
   {
     student: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     tutor: { type: mongoose.Schema.Types.ObjectId, ref: "Tutor", required: true },
+    studentName: { type: String, required: true, trim: true, maxlength: 80 },
+    studentEmail: { type: String, required: true, trim: true, lowercase: true },
+    phone: { type: String, required: true, trim: true, maxlength: 20 },
     startsAt: { type: Date, required: true },
-    sessionToken: { type: String, required: true, unique: true }
+    sessionToken: { type: String, required: true, unique: true },
+    status: { type: String, required: true, enum: ["Confirmed"], default: "Confirmed" }
   },
   { timestamps: true }
 );

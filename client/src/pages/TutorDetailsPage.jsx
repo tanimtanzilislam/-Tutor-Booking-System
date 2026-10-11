@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { DateTime } from "luxon";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api.js";
 import { useAuth } from "../auth/AuthContext.jsx";
@@ -14,8 +15,10 @@ export default function TutorDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [startsAt, setStartsAt] = useState("");
+  const [phone, setPhone] = useState("");
   const [bookingError, setBookingError] = useState("");
   const [sessionToken, setSessionToken] = useState("");
+  const [bookingStatus, setBookingStatus] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -31,20 +34,37 @@ export default function TutorDetailsPage() {
   }, [tutorId]);
 
   const choices = useMemo(() => tutor ? availableStarts(tutor) : [], [tutor]);
+  const remainingSlots = tutor && Number.isInteger(tutor.totalSlots) ? tutor.totalSlots : 0;
+  const sessionNotStarted = Boolean(
+    tutor?.sessionStartDate &&
+    DateTime.now().setZone(tutor.timeZone).toISODate() < tutor.sessionStartDate
+  );
+  const bookingUnavailableMessage = remainingSlots <= 0
+    ? "No available slots left. This session is fully booked. You can’t join at the moment."
+    : sessionNotStarted
+      ? "Booking is not available yet for this tutor."
+      : "";
 
   async function bookSession(event) {
     event.preventDefault();
     setBookingError("");
     setSessionToken("");
+    setBookingStatus("");
     setSubmitting(true);
     try {
       const result = await api("/bookings", {
         method: "POST",
-        body: JSON.stringify({ tutorId: tutor._id, startsAt })
+        body: JSON.stringify({ tutorId: tutor._id, startsAt, phone })
       });
       setSessionToken(result.booking.sessionToken);
+      setBookingStatus(result.booking.status);
+      setStartsAt("");
+      setTutor((current) => ({ ...current, totalSlots: result.booking.tutor.totalSlots }));
     } catch (requestError) {
       setBookingError(requestError.message);
+      if (requestError.message === "No available slots left.") {
+        setTutor((current) => ({ ...current, totalSlots: 0 }));
+      }
     } finally {
       setSubmitting(false);
     }
@@ -83,7 +103,7 @@ export default function TutorDetailsPage() {
             <p><span>Location</span>{tutor.location}</p>
             <p><span>Teaching mode</span>{tutor.teachingMode}</p>
             <p><span>Session start date</span>{tutor.sessionStartDate || "Available now"}</p>
-            <p><span>Slots per available day</span>{tutor.totalSlots ?? "Varies by schedule"}</p>
+            <p><span>Booking slots remaining</span>{remainingSlots}</p>
           </div>
           {tutor.bio && <p className="tutor-detail-bio">{tutor.bio}</p>}
           <div className="detail-facts">
@@ -108,20 +128,33 @@ export default function TutorDetailsPage() {
           <h2>Book a session</h2>
           <p className="booking-intro">Choose one of the tutor’s one-hour sessions. Available times are shown in your local timezone.</p>
           <form className="booking-form detail-booking-form" onSubmit={bookSession}>
-            <label htmlFor="session-time">Available sessions</label>
-            {choices.length ? (
-              <select id="session-time" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} required>
-                <option value="">Choose a time</option>
-                {choices.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}
-              </select>
+            <label htmlFor="student-name">Student name</label>
+            <input id="student-name" value={user?.name || ""} readOnly />
+            <label htmlFor="student-phone">Phone</label>
+            <input id="student-phone" type="tel" autoComplete="tel" value={phone} onChange={(event) => setPhone(event.target.value)} required minLength={7} maxLength={20} pattern="[+()0-9][+()0-9 .-]{5,19}" title="Enter a valid phone number with at least 7 digits." />
+            <label htmlFor="tutor-id">Tutor ID</label>
+            <input id="tutor-id" value={tutor._id} readOnly />
+            <label htmlFor="tutor-name">Tutor name</label>
+            <input id="tutor-name" value={tutor.name} readOnly />
+            <label htmlFor="student-email">Student email</label>
+            <input id="student-email" type="email" value={user?.email || ""} readOnly />
+            {bookingUnavailableMessage ? (
+              <p className="empty-slots" role="status">{bookingUnavailableMessage}</p>
+            ) : choices.length ? (
+              <>
+                <label htmlFor="session-time">Available sessions</label>
+                <select id="session-time" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} required>
+                  <option value="">Choose a time</option>
+                  {choices.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}
+                </select>
+              </>
             ) : (
               <p className="empty-slots">No upcoming sessions are available in the next three weeks.</p>
             )}
-            {user ? (
-              <button className="button button-dark button-full" type="submit" disabled={!startsAt || submitting || !choices.length}>
-                {submitting ? "Booking..." : "Confirm booking"}
-              </button>
-            ) : (
+            <button className="button button-dark button-full" type="submit" disabled={!user || !startsAt || !phone || submitting || !choices.length || Boolean(bookingUnavailableMessage)}>
+              {submitting ? "Booking..." : "Confirm booking"}
+            </button>
+            {!user && (
               <Link className="button button-dark button-full" to="/login" state={{ from: `/tutors/${tutor._id}` }}>
                 Log in to book
               </Link>
@@ -129,9 +162,12 @@ export default function TutorDetailsPage() {
             <ErrorMessage>{bookingError}</ErrorMessage>
             {sessionToken && (
               <p className="form-success" role="status">
-                Session booked. Your token is <code className="inline-token">{sessionToken}</code>.{" "}
+                Session booked. Status: {bookingStatus}. Your token is <code className="inline-token">{sessionToken}</code>.{" "}
                 <Link to="/my-sessions">View sessions</Link>
               </p>
+            )}
+            {sessionToken && remainingSlots === 0 && (
+              <p className="empty-slots" role="status">This session is fully booked. You can’t join at the moment.</p>
             )}
           </form>
         </aside>

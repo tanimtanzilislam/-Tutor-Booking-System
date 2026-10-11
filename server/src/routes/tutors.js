@@ -130,9 +130,9 @@ router.post("/", requireAuth, async (req, res, next) => {
       }
       const startMinute = Number(window.startTime.slice(0, 2)) * 60 + Number(window.startTime.slice(3));
       const endMinute = Number(window.endTime.slice(0, 2)) * 60 + Number(window.endTime.slice(3));
-      if (startMinute % 60 !== 0 || endMinute % 60 !== 0 || slotCount > (endMinute - startMinute) / 60) {
+      if (startMinute % 60 !== 0 || endMinute % 60 !== 0) {
         return res.status(400).json({
-          message: "Each daily availability window must fit the requested number of one-hour slots and start/end on the hour."
+          message: "Each weekly availability window must start and end on the hour."
         });
       }
       days.add(window.dayOfWeek);

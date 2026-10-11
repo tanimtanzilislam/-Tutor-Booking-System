@@ -129,7 +129,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .booking-form { display: grid; gap: 10px; margin-top: 19px; padding-top: 17px; border-top: 1px solid #edf0eb; }
 .booking-form > label { color: var(--ink); font-size: 11px; font-weight: 700; }
 .booking-form > label > span { color: var(--muted); font-weight: 400; }
-.booking-form select, .editor-card input:not([type="checkbox"]), .editor-card textarea, .time-inputs input { width: 100%; min-height: 43px; padding: 0 11px; border: 1px solid #dfe7df; border-radius: 6px; background: white; color: var(--ink); font-size: 12px; }
+.booking-form input, .booking-form select, .editor-card input:not([type="checkbox"]), .editor-card textarea, .time-inputs input { width: 100%; min-height: 43px; padding: 0 11px; border: 1px solid #dfe7df; border-radius: 6px; background: white; color: var(--ink); font-size: 12px; }
 .booking-form .button { min-height: 42px; }
 .empty-slots { margin: 0; color: var(--muted); font-size: 11px; }
 .form-error { margin: 0; color: #a33d33; font-size: 12px; line-height: 1.5; }

@@ -26,7 +26,7 @@ export default function MySessionsPage() {
             <article className="session-card" key={booking._id}>
               <div className="session-date"><span>{DateTime.fromISO(booking.startsAt).toLocal().toFormat("ccc")}</span><strong>{DateTime.fromISO(booking.startsAt).toLocal().toFormat("dd")}</strong><span>{DateTime.fromISO(booking.startsAt).toLocal().toFormat("LLL")}</span></div>
               <div className="session-main"><span className="subject-pill">{booking.tutor?.subject || "Tutor session"}</span><h2>{booking.tutor?.name || "Tutor"}</h2><p>{DateTime.fromISO(booking.startsAt).toLocal().toLocaleString(DateTime.TIME_SIMPLE)} · 1 hour · Your local time</p></div>
-              <div className="session-token"><span>Session token</span><code>{booking.sessionToken}</code></div>
+              <div className="session-token"><span>Session token · {booking.status || "Confirmed"}</span><code>{booking.sessionToken}</code></div>
             </article>
           ))}
         </div>

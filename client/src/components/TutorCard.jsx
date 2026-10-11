@@ -18,7 +18,7 @@ export default function TutorCard({ tutor }) {
       <p className="tutor-bio">{[tutor.location, tutor.teachingMode].filter(Boolean).join(" · ") || tutor.bio}</p>
       <div className="availability-caption">
         <span className="availability-dot" />
-        {tutor.totalSlots ? `${tutor.totalSlots} sessions per available day` : "Weekly availability"} · {tutor.timeZone}
+        {Number(tutor.totalSlots) > 0 ? `${tutor.totalSlots} booking slots remaining` : "Fully booked"} · {tutor.timeZone}
       </div>
       <Link className="button button-dark button-full tutor-card-action" to={`/tutors/${tutor._id}`}>
         Book Session

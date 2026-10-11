@@ -18,12 +18,10 @@ export function availableStarts(tutor) {
 
     const startMinute = Number(availability.startTime.slice(0, 2)) * 60 + Number(availability.startTime.slice(3));
     const endMinute = Number(availability.endTime.slice(0, 2)) * 60 + Number(availability.endTime.slice(3));
-    const slotCount = tutor.totalSlots ?? Math.floor((endMinute - startMinute) / 60);
     const startHour = startMinute / 60;
 
-    for (let slot = 0; slot < slotCount; slot += 1) {
+    for (let slot = 0; startMinute + (slot + 1) * 60 <= endMinute; slot += 1) {
       const hour = startHour + slot;
-      if ((hour + 1) * 60 > endMinute) break;
       const tutorLocalStart = DateTime.fromObject(
         { year: day.year, month: day.month, day: day.day, hour },
         { zone: tutor.timeZone }

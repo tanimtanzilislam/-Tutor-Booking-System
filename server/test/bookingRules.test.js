@@ -1,7 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { DateTime } from "luxon";
-import { isStartWithinAvailability, oneHourSessionsOverlap } from "../src/bookingRules.js";
+import {
+  isStartWithinAvailability,
+  isStartOnOrAfterSessionDate,
+  isTutorSessionDateReached,
+  oneHourSessionsOverlap
+} from "../src/bookingRules.js";
 
 const timezone = "Europe/Paris";
 const mondayMorning = [{ dayOfWeek: 1, startTime: "09:00", endTime: "12:00" }];
@@ -27,15 +32,25 @@ test("uses the tutor timezone when determining the weekday", () => {
   assert.equal(isStartWithinAvailability(utcMondayMorning, timezone, mondayMorning), true);
 });
 
-test("limits daily bookable appointments to the tutor's configured total slots", () => {
-  assert.equal(isStartWithinAvailability(tutorLocalStart(12, 9), timezone, mondayMorning, "2026-10-12", 2), true);
-  assert.equal(isStartWithinAvailability(tutorLocalStart(12, 10), timezone, mondayMorning, "2026-10-12", 2), true);
-  assert.equal(isStartWithinAvailability(tutorLocalStart(12, 11), timezone, mondayMorning, "2026-10-12", 2), false);
+test("keeps the full weekly schedule available regardless of remaining booking capacity", () => {
+  assert.equal(isStartWithinAvailability(tutorLocalStart(12, 9), timezone, mondayMorning, "2026-10-12"), true);
+  assert.equal(isStartWithinAvailability(tutorLocalStart(12, 10), timezone, mondayMorning, "2026-10-12"), true);
+  assert.equal(isStartWithinAvailability(tutorLocalStart(12, 11), timezone, mondayMorning, "2026-10-12"), true);
 });
 
 test("does not offer a recurring weekday before the session start date", () => {
-  assert.equal(isStartWithinAvailability(tutorLocalStart(12, 10), timezone, mondayMorning, "2026-10-13", 3), false);
-  assert.equal(isStartWithinAvailability(tutorLocalStart(19, 10), timezone, mondayMorning, "2026-10-13", 3), true);
+  assert.equal(isStartWithinAvailability(tutorLocalStart(12, 10), timezone, mondayMorning, "2026-10-13"), false);
+  assert.equal(isStartWithinAvailability(tutorLocalStart(19, 10), timezone, mondayMorning, "2026-10-13"), true);
+  assert.equal(isStartOnOrAfterSessionDate(tutorLocalStart(12, 10), timezone, "2026-10-13"), false);
+  assert.equal(isStartOnOrAfterSessionDate(tutorLocalStart(19, 10), timezone, "2026-10-13"), true);
+});
+
+test("blocks booking until the tutor-local session start date", () => {
+  const beforeStartDate = new Date("2026-10-11T21:30:00.000Z");
+  const startDateDay = new Date("2026-10-12T00:00:00.000Z");
+  assert.equal(isTutorSessionDateReached(beforeStartDate, timezone, "2026-10-12"), false);
+  assert.equal(isTutorSessionDateReached(startDateDay, timezone, "2026-10-12"), true);
+  assert.equal(isTutorSessionDateReached(beforeStartDate, timezone, undefined), true);
 });
 
 test("treats one-hour sessions that touch at the boundary as non-conflicting", () => {

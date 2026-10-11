@@ -53,14 +53,13 @@ export default function AddTutorPage() {
 
   function validateAvailability() {
     if (availability.length === 0) return "Choose at least one available day.";
-    const totalSlots = Number(details.totalSlots);
     const insufficientWindow = availability.find((window) => {
       const start = Number(window.startTime.slice(0, 2)) * 60 + Number(window.startTime.slice(3));
       const end = Number(window.endTime.slice(0, 2)) * 60 + Number(window.endTime.slice(3));
-      return start % 60 !== 0 || end % 60 !== 0 || totalSlots > (end - start) / 60;
+      return start % 60 !== 0 || end % 60 !== 0 || start >= end;
     });
     return insufficientWindow
-      ? "Each selected day's time range must fit the total number of one-hour slots and use on-the-hour times."
+      ? "Each selected day's time range must use valid on-the-hour start and end times."
       : "";
   }
 
@@ -160,13 +159,13 @@ export default function AddTutorPage() {
             <input name="sessionStartDate" type="date" value={details.sessionStartDate} onChange={updateDetails} min={DateTime.now().toISODate()} required />
           </label>
           <label>
-            Total slots per available day
+            Total booking slots
             <input name="totalSlots" type="number" min="1" max="24" step="1" value={details.totalSlots} onChange={updateDetails} required />
           </label>
         </div>
         <fieldset className="availability-editor">
           <legend>Available days and time slots</legend>
-          <p>Sessions are one hour. The first daily slots begin at the selected start time; availability repeats weekly from the session start date.</p>
+          <p>Sessions are one hour. Weekly availability repeats from the session start date; the booking-slot limit applies across all dates.</p>
           {weekdays.map((day, dayOfWeek) => {
             const window = availability.find((item) => item.dayOfWeek === dayOfWeek);
             return (
