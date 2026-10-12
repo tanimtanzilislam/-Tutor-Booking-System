@@ -52,10 +52,10 @@ export default function HomePage() {
   const subjects = [...new Set(tutors.map((tutor) => tutor.subject))];
   return (
     <>
-      <section className="hero shell" aria-label="Featured learning stories">
-        <img className="hero-image" src={slide.image} alt={slide.alt} />
+      <section className="hero shell" aria-label="Featured learning stories" data-reveal>
+        <img key={slide.image} className="hero-image" src={slide.image} alt={slide.alt} />
         <div className="hero-shade" />
-        <div className="hero-content">
+        <div className="hero-content" key={active}>
           <p className="eyebrow">{slide.eyebrow}</p>
           <h1>{slide.title}</h1>
           <p className="hero-copy">{slide.text}</p>
@@ -79,7 +79,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="available-tutors-section shell" aria-labelledby="available-tutors-heading">
+      <section className="available-tutors-section shell" aria-labelledby="available-tutors-heading" data-reveal>
         <div className="section-heading-row">
           <div>
             <p className="section-kicker">Start somewhere good</p>
@@ -111,7 +111,7 @@ export default function HomePage() {
             <p>Start with a subject, then choose a tutor whose weekly schedule works for you.</p>
           </div>
           {subjects.length ? (
-            <div className="subject-links" aria-label="Subjects offered by available tutors">
+            <div className="subject-links" aria-label="Subjects offered by available tutors" data-reveal>
               {subjects.map((subject) => (
                 <Link key={subject} to={`/tutors?subject=${encodeURIComponent(subject)}`}>
                   {subject}<span aria-hidden="true">↗</span>
@@ -124,7 +124,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="intro-section shell" id="how-it-works">
+      <section className="intro-section shell" id="how-it-works" data-reveal>
         <div className="section-kicker">A clearer way to learn</div>
         <div className="intro-grid">
           <h2>Good learning starts with the right conversation.</h2>
@@ -136,7 +136,7 @@ export default function HomePage() {
           <article><span>03</span><h3>Keep your token</h3><p>Your booking confirmation includes a unique session token.</p></article>
         </div>
       </section>
-      <section className="session-prep-section">
+      <section className="session-prep-section" data-reveal>
         <div className="shell session-prep-inner">
           <div className="session-prep-heading">
             <p className="section-kicker">Make it your hour</p>
@@ -150,7 +150,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-      <section className="home-cta">
+      <section className="home-cta" data-reveal>
         <div className="shell home-cta-inner">
           <div><p className="eyebrow">A next step is waiting</p><h2>Curiosity looks good on you.</h2></div>
           <Link className="button button-dark" to="/tutors">Meet the tutors <span aria-hidden="true">↗</span></Link>

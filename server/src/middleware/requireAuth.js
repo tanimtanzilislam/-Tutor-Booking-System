@@ -10,6 +10,9 @@ export default function requireAuth(req, res, next) {
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
+    if (typeof payload !== "object" || typeof payload.sub !== "string" || !payload.sub) {
+      return res.status(401).json({ message: "Your session is invalid or has expired. Please log in again." });
+    }
     req.userId = payload.sub;
     return next();
   } catch {

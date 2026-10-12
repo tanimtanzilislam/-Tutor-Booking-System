@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { useTheme } from "../theme/ThemeContext.jsx";
 
 function Avatar({ user, className = "" }) {
   const [imageFailed, setImageFailed] = useState(false);
@@ -12,6 +13,7 @@ function Avatar({ user, className = "" }) {
 
 export default function Navbar() {
   const { user, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   function logout() {
@@ -38,6 +40,16 @@ export default function Navbar() {
           )}
         </div>
         <div className="nav-account">
+          <button
+            className="theme-toggle"
+            type="button"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
+            aria-pressed={theme === "dark"}
+          >
+            <span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span>
+            <span className="theme-toggle-label">{theme === "light" ? "Dark" : "Light"}</span>
+          </button>
           {user ? (
             <details className="profile-menu">
               <summary aria-label="Open profile menu">

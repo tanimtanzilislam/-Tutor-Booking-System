@@ -61,7 +61,7 @@ export default function MySessionsPage() {
       </div>
       {error && <ErrorMessage>{error}</ErrorMessage>}
       {loading ? <Loading label="Loading your sessions..." /> : bookings.length ? (
-        <div className="sessions-table-wrap">
+        <div className="sessions-table-wrap" data-reveal>
           <table className="sessions-table">
             <thead>
               <tr>
@@ -109,7 +109,7 @@ export default function MySessionsPage() {
       )}
       {bookingToCancel && (
         <div className="modal-backdrop">
-          <section className="confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-title" aria-describedby="cancel-description">
+          <section className="confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-title" aria-describedby="cancel-description" data-reveal>
             <p className="section-kicker">Please confirm</p>
             <h2 id="cancel-title">Cancel this session?</h2>
             <p id="cancel-description">Your booking with {bookingToCancel.tutor?.name || "this tutor"} will be marked cancelled. Its booking slot will become available again.</p>

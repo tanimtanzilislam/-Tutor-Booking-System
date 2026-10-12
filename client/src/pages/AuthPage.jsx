@@ -79,13 +79,13 @@ export default function AuthPage({ mode }) {
 
   return (
     <section className="auth-section shell">
-      <div className="auth-aside">
+      <div className="auth-aside" data-reveal>
         <p className="eyebrow">Welcome to MediQueue</p>
         <h1>{isRegister ? "Start your learning journey." : "Good to see you again."}</h1>
         <p>Thoughtful tutoring, and a simpler way to find time for it.</p>
         <div className="auth-aside-note"><span>✳</span><p>Come as you are. Leave with a clearer next step.</p></div>
       </div>
-      <div className="auth-card">
+      <div className="auth-card" data-reveal>
         <p className="section-kicker">{isRegister ? "Create your account" : "Your account"}</p>
         <h2>{isRegister ? "Register" : "Login"}</h2>
         {!isRegister && location.state?.notice && <p className="form-success" role="status">{location.state.notice}</p>}

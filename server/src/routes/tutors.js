@@ -38,9 +38,40 @@ router.get("/featured", async (_req, res, next) => {
 router.get("/", async (req, res, next) => {
   try {
     const filter = {};
-    if (typeof req.query.subject === "string" && req.query.subject.trim()) {
-      const subject = req.query.subject.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      filter.subject = { $regex: subject, $options: "i" };
+    for (const [queryKey, field] of [["subject", "subject"], ["location", "location"]]) {
+      if (typeof req.query[queryKey] === "string" && req.query[queryKey].trim()) {
+        const value = req.query[queryKey].trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const matcher = { $regex: value, $options: "i" };
+        if (field === "subject") {
+          filter.$or = [
+            { subject: matcher },
+            { name: matcher },
+            { institution: matcher }
+          ];
+        } else {
+          filter[field] = matcher;
+        }
+      }
+    }
+    if (req.query.teachingMode !== undefined) {
+      if (!["Online", "Offline", "Both"].includes(req.query.teachingMode)) {
+        return res.status(400).json({ message: "Choose a valid teaching mode filter." });
+      }
+      filter.teachingMode = req.query.teachingMode;
+    }
+    const minHourlyRate = req.query.minHourlyRate === undefined ? undefined : Number(req.query.minHourlyRate);
+    const maxHourlyRate = req.query.maxHourlyRate === undefined ? undefined : Number(req.query.maxHourlyRate);
+    if (
+      (minHourlyRate !== undefined && (!Number.isFinite(minHourlyRate) || minHourlyRate < 0)) ||
+      (maxHourlyRate !== undefined && (!Number.isFinite(maxHourlyRate) || maxHourlyRate < 0)) ||
+      (minHourlyRate !== undefined && maxHourlyRate !== undefined && minHourlyRate > maxHourlyRate)
+    ) {
+      return res.status(400).json({ message: "Enter a valid minimum and maximum hourly fee." });
+    }
+    if (minHourlyRate !== undefined || maxHourlyRate !== undefined) {
+      filter.hourlyRate = {};
+      if (minHourlyRate !== undefined) filter.hourlyRate.$gte = minHourlyRate;
+      if (maxHourlyRate !== undefined) filter.hourlyRate.$lte = maxHourlyRate;
     }
     const tutors = await Tutor.find(filter).sort({ createdAt: -1 });
     return res.json({ tutors });

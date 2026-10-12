@@ -93,7 +93,7 @@ export default function TutorDetailsPage() {
     <section className="tutor-details-page shell">
       <Link className="back-link" to="/tutors">← Back to tutors</Link>
       <div className="tutor-details-grid">
-        <article className="tutor-detail-card">
+        <article className="tutor-detail-card" data-reveal>
           <div className="tutor-card-top">
             <span className="subject-pill">{tutor.subject}</span>
             <span className="tutor-rate">${tutor.hourlyRate}<small> / hour</small></span>
@@ -127,7 +127,7 @@ export default function TutorDetailsPage() {
           </section>
         </article>
 
-        <aside className="session-booking-card">
+        <aside className="session-booking-card" data-reveal>
           <p className="section-kicker">Make it official</p>
           <h2>Book a session</h2>
           <p className="booking-intro">Choose one of the tutor’s one-hour sessions. Available times are shown in your local timezone.</p>

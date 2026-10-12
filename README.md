@@ -5,6 +5,7 @@ MediQueue is a MERN tutor-booking application with a React/Vite client and an Ex
 ## Visual direction
 
 The interface uses an editorial learning-studio style: warm paper backgrounds, deep ink typography, teal and coral accents, consistent rounded buttons, and uniform image-led tutor cards. The shared layout and card grid adapt across desktop, tablet, and mobile widths.
+Subtle reveal, carousel, card, and modal animations support the visual system; users who prefer reduced motion receive static transitions.
 
 ## Requirements
 
@@ -26,10 +27,13 @@ For local Google OAuth, register `http://localhost:5000/api/auth/google/callback
 ## Implemented flows
 
 - Student registration, login, session restoration, and logout
+- JWT sessions for password and Google login; bearer tokens are persisted on the client and verified by middleware on protected API routes
 - Registration requires a name, email, photo URL, and password; successful registration returns to Login
 - Google OAuth login (requires Google OAuth credentials)
 - Registration validates passwords for at least six characters, one uppercase letter, and one lowercase letter
 - Public tutor search by subject
+- Tutor directory filtering by subject, location, teaching mode, and minimum/maximum hourly fee
+- Persistent light/dark theme toggle available from the navbar across all routes
 - A home-page featured tutor section that retrieves up to six recent tutors using a MongoDB aggregation `$limit` stage
 - Tutor detail pages with weekly availability and one-hour booking
 - Homepage subject links that open the tutor directory with the subject filter applied

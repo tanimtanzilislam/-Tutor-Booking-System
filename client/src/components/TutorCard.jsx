@@ -5,7 +5,7 @@ export default function TutorCard({ tutor }) {
   const [imageFailed, setImageFailed] = useState(false);
 
   return (
-    <article className="tutor-card">
+    <article className="tutor-card" data-reveal>
       <div className="tutor-card-image-wrap">
         {tutor.photoUrl && !imageFailed
           ? <img className="tutor-card-photo" src={tutor.photoUrl} alt={`${tutor.name} profile`} loading="lazy" onError={() => setImageFailed(true)} />

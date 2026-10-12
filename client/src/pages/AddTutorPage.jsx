@@ -101,12 +101,12 @@ export default function AddTutorPage() {
 
   return (
     <section className="form-page shell">
-      <div className="form-page-intro">
+      <div className="form-page-intro" data-reveal>
         <p className="section-kicker">Share what you know</p>
         <h1>Add a tutor</h1>
         <p>Complete the tutor profile and weekly schedule. Times are saved in your current timezone.</p>
       </div>
-      <form className="editor-card tutor-editor" onSubmit={submit}>
+      <form className="editor-card tutor-editor" onSubmit={submit} data-reveal>
         <div className="form-fields-two">
           <label>
             Tutor name
