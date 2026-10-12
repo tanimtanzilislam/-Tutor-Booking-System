@@ -33,9 +33,13 @@ export default function Navbar() {
           <NavLink to="/tutors">Tutors</NavLink>
           {user && (
             <>
-              <NavLink to="/add-tutor">Add Tutor</NavLink>
-              <NavLink to="/my-tutors">My Tutors</NavLink>
-              <NavLink to="/my-sessions">My Booked Sessions</NavLink>
+              {user.role === "tutor" && (
+                <>
+                  <NavLink to="/add-tutor">Create Tutor Profile</NavLink>
+                  <NavLink to="/my-tutors">My Tutor Profile</NavLink>
+                </>
+              )}
+              {user.role === "student" && <NavLink to="/my-sessions">My Booked Sessions</NavLink>}
             </>
           )}
         </div>

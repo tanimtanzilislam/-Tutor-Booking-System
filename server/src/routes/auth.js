@@ -63,21 +63,23 @@ function redirectGoogleError(res, code) {
 }
 
 function createSession(user) {
-  const token = jwt.sign({ sub: user.id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+  const role = user.role === "tutor" ? "tutor" : "student";
+  const token = jwt.sign({ sub: user.id, role }, process.env.JWT_SECRET, { expiresIn: "7d" });
   return {
     token,
     user: {
       id: user.id,
       name: user.name,
       email: user.email,
-      profileImage: user.profileImage
+      profileImage: user.profileImage,
+      role
     }
   };
 }
 
 router.post("/register", async (req, res, next) => {
   try {
-    const { name, email, password, profileImage = "" } = req.body;
+    const { name, email, password, profileImage = "", role = "student" } = req.body;
     if (typeof name !== "string" || !name.trim() || typeof email !== "string" || !email.trim()) {
       return res.status(400).json({ message: "Name and email are required." });
     }
@@ -85,6 +87,9 @@ router.post("/register", async (req, res, next) => {
       return res.status(400).json({
         message: "Password must be at least 6 characters and include an uppercase and a lowercase letter."
       });
+    }
+    if (!["student", "tutor"].includes(role)) {
+      return res.status(400).json({ message: "Choose either a student or tutor account." });
     }
     if (typeof profileImage !== "string" || !profileImage.trim()) {
       return res.status(400).json({ message: "Profile image must be a URL." });
@@ -103,7 +108,8 @@ router.post("/register", async (req, res, next) => {
       name: name.trim(),
       email: email.trim().toLowerCase(),
       passwordHash,
-      profileImage: profileImage.trim()
+      profileImage: profileImage.trim(),
+      role
     });
     return res.status(201).json({ message: "Account created. Please log in." });
   } catch (error) {
@@ -252,14 +258,15 @@ router.get("/google/callback", async (req, res) => {
 
 router.get("/me", requireAuth, async (req, res, next) => {
   try {
-    const user = await User.findById(req.userId).select("name email profileImage");
+    const user = await User.findById(req.userId).select("name email profileImage role");
     if (!user) return res.status(401).json({ message: "Your account could not be found. Please log in again." });
     return res.json({
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
-        profileImage: user.profileImage
+        profileImage: user.profileImage,
+        role: user.role === "tutor" ? "tutor" : "student"
       }
     });
   } catch (error) {

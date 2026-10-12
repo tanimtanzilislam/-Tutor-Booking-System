@@ -1,20 +1,37 @@
 import { DateTime } from "luxon";
 
+export function normalizeSessionStartDate(sessionStartDate) {
+  if (sessionStartDate instanceof Date) {
+    return Number.isNaN(sessionStartDate.getTime())
+      ? null
+      : DateTime.fromJSDate(sessionStartDate, { zone: "UTC" }).toISODate();
+  }
+  if (typeof sessionStartDate !== "string") return null;
+  const value = sessionStartDate.trim();
+  const match = /^(\d{4}-\d{2}-\d{2})(?:$|T)/.exec(value);
+  if (match) {
+    const parsedDate = DateTime.fromISO(match[1]);
+    return parsedDate.isValid && parsedDate.toISODate() === match[1] ? match[1] : null;
+  }
+
+  // Older MongoDB documents may contain BSON dates that Mongoose cast to Date.toString().
+  if (!/^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s/.test(value)) return null;
+  const legacyDate = new Date(value);
+  return Number.isNaN(legacyDate.getTime())
+    ? null
+    : DateTime.fromJSDate(legacyDate, { zone: "UTC" }).toISODate();
+}
+
 export function isOnTutorLocalHour(start, timeZone) {
   const localStart = DateTime.fromJSDate(start, { zone: timeZone });
   return localStart.isValid && localStart.minute === 0 && localStart.second === 0 && localStart.millisecond === 0;
 }
 
-export function isTutorSessionDateReached(now, timeZone, sessionStartDate) {
-  if (!sessionStartDate) return true;
-  const tutorToday = DateTime.fromJSDate(now, { zone: timeZone }).toISODate();
-  return Boolean(tutorToday && tutorToday >= sessionStartDate);
-}
-
 export function isStartOnOrAfterSessionDate(start, timeZone, sessionStartDate) {
   if (!sessionStartDate) return true;
-  const localStartDate = DateTime.fromJSDate(start, { zone: timeZone }).toISODate();
-  return Boolean(localStartDate && localStartDate >= sessionStartDate);
+  const startDate = DateTime.fromJSDate(start, { zone: timeZone }).toISODate();
+  const firstSessionDate = normalizeSessionStartDate(sessionStartDate);
+  return Boolean(startDate && firstSessionDate && startDate >= firstSessionDate);
 }
 
 export function isStartWithinAvailability(start, timeZone, availability, sessionStartDate) {

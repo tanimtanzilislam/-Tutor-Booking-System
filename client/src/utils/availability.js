@@ -1,17 +1,28 @@
 import { DateTime } from "luxon";
 
+function normalizedSessionStartDate(sessionStartDate) {
+  if (typeof sessionStartDate !== "string") return null;
+  const match = /^(\d{4}-\d{2}-\d{2})(?:$|T)/.exec(sessionStartDate);
+  if (!match) return null;
+
+  const parsedDate = DateTime.fromISO(match[1]);
+  return parsedDate.isValid && parsedDate.toISODate() === match[1] ? match[1] : null;
+}
+
 export function availableStarts(tutor) {
   const now = DateTime.now();
   const tutorNow = now.setZone(tutor.timeZone);
   const choices = [];
-  const availableFrom = tutor.sessionStartDate
-    ? DateTime.fromISO(tutor.sessionStartDate, { zone: tutor.timeZone }).startOf("day")
+  const sessionStartDate = normalizedSessionStartDate(tutor.sessionStartDate);
+  const availableFrom = sessionStartDate
+    ? DateTime.fromISO(sessionStartDate, { zone: tutor.timeZone }).startOf("day")
     : tutorNow.startOf("day");
+  if (tutor.sessionStartDate && !sessionStartDate) return choices;
   const firstOffset = Math.max(0, Math.ceil(availableFrom.diff(tutorNow.startOf("day"), "days").days));
 
   for (let offset = firstOffset; offset < firstOffset + 21; offset += 1) {
     const day = tutorNow.plus({ days: offset });
-    if (day.toISODate() < tutor.sessionStartDate) continue;
+    if (sessionStartDate && day.toISODate() < sessionStartDate) continue;
     const weekday = day.weekday % 7;
     const availability = tutor.availability.find((window) => window.dayOfWeek === weekday);
     if (!availability) continue;

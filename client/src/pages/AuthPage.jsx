@@ -18,7 +18,7 @@ export default function AuthPage({ mode }) {
   const { notify } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const [values, setValues] = useState({ name: "", email: "", password: "", profileImage: "" });
+  const [values, setValues] = useState({ name: "", email: "", password: "", profileImage: "", role: "student" });
   const [error, setError] = useState(() => (
     new URLSearchParams(window.location.search).get("google") === "failed"
       ? "Google sign-in could not be completed. Please try again or log in with your email."
@@ -60,7 +60,8 @@ export default function AuthPage({ mode }) {
             name: values.name,
             email: values.email,
             profileImage: values.profileImage,
-            password: values.password
+            password: values.password,
+            role: values.role
           })
         });
         notify("Your account is ready. Log in to continue.");
@@ -93,6 +94,15 @@ export default function AuthPage({ mode }) {
           {isRegister && (
             <label>Name<input name="name" value={values.name} onChange={update} autoComplete="name" required maxLength={80} /></label>
           )}
+          {isRegister && (
+            <label>
+              Account type
+              <select name="role" value={values.role} onChange={update} required>
+                <option value="student">Student — book tutoring sessions</option>
+                <option value="tutor">Tutor — publish tutor listings</option>
+              </select>
+            </label>
+          )}
           <label>Email address<input name="email" type="email" value={values.email} onChange={update} autoComplete="email" required /></label>
           <label>Password<input name="password" type="password" value={values.password} onChange={update} autoComplete={isRegister ? "new-password" : "current-password"} minLength={isRegister ? 6 : undefined} required /></label>
           {isRegister && (
@@ -114,6 +124,7 @@ export default function AuthPage({ mode }) {
           <span className="google-mark" aria-hidden="true">G</span>
           Continue with Google
         </button>
+        {isRegister && <p className="password-hint">Google sign-up creates a student account.</p>}
         <p className="auth-switch">
           {isRegister ? "Already have an account?" : "New to MediQueue?"}{" "}
           <Link to={isRegister ? "/login" : "/register"}>{isRegister ? "Login" : "Register"}</Link>

@@ -4,8 +4,8 @@ import { useLocation } from "react-router-dom";
 const routeTitles = {
   "/": "Home",
   "/tutors": "Tutors",
-  "/add-tutor": "Add Tutor",
-  "/my-tutors": "My Tutors",
+  "/add-tutor": "Create Tutor Profile",
+  "/my-tutors": "My Tutor Profile",
   "/my-sessions": "My Booked Sessions",
   "/profile": "Profile",
   "/login": "Login",

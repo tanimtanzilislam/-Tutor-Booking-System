@@ -1,15 +1,18 @@
 import { Router } from "express";
-import { DateTime } from "luxon";
 import mongoose from "mongoose";
 import Tutor from "../models/Tutor.js";
-import requireAuth from "../middleware/requireAuth.js";
+import Booking from "../models/Booking.js";
+import requireAuth, { requireRole } from "../middleware/requireAuth.js";
+import { isStartOnOrAfterSessionDate, isStartWithinAvailability } from "../bookingRules.js";
+import { validateTutorPayload } from "../tutorValidation.js";
+import { serializeTutor } from "../tutorSerialization.js";
 
 const router = Router();
-const timePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
 
 router.get("/featured", async (_req, res, next) => {
   try {
     const tutors = await Tutor.aggregate([
+      { $match: { isActive: { $ne: false } } },
       { $sort: { createdAt: -1 } },
       { $limit: 6 },
       {
@@ -29,7 +32,7 @@ router.get("/featured", async (_req, res, next) => {
         }
       }
     ]);
-    return res.json({ tutors });
+    return res.json({ tutors: tutors.map(serializeTutor) });
   } catch (error) {
     return next(error);
   }
@@ -37,7 +40,7 @@ router.get("/featured", async (_req, res, next) => {
 
 router.get("/", async (req, res, next) => {
   try {
-    const filter = {};
+    const filter = { isActive: { $ne: false } };
     for (const [queryKey, field] of [["subject", "subject"], ["location", "location"]]) {
       if (typeof req.query[queryKey] === "string" && req.query[queryKey].trim()) {
         const value = req.query[queryKey].trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -74,7 +77,19 @@ router.get("/", async (req, res, next) => {
       if (maxHourlyRate !== undefined) filter.hourlyRate.$lte = maxHourlyRate;
     }
     const tutors = await Tutor.find(filter).sort({ createdAt: -1 });
-    return res.json({ tutors });
+    return res.json({ tutors: tutors.map(serializeTutor) });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/mine", requireAuth, requireRole("tutor"), async (req, res, next) => {
+  try {
+    const tutors = await Tutor.find({
+      createdBy: req.userId,
+      isActive: { $ne: false }
+    }).sort({ createdAt: -1 });
+    return res.json({ tutors: tutors.map(serializeTutor) });
   } catch (error) {
     return next(error);
   }
@@ -85,106 +100,106 @@ router.get("/:tutorId", async (req, res, next) => {
     if (!mongoose.isValidObjectId(req.params.tutorId)) {
       return res.status(404).json({ message: "Tutor not found." });
     }
-    const tutor = await Tutor.findById(req.params.tutorId);
+    const tutor = await Tutor.findOne({ _id: req.params.tutorId, isActive: { $ne: false } });
     if (!tutor) return res.status(404).json({ message: "Tutor not found." });
-    return res.json({ tutor });
+    return res.json({ tutor: serializeTutor(tutor) });
   } catch (error) {
     return next(error);
   }
 });
 
-router.post("/", requireAuth, async (req, res, next) => {
+router.patch("/:tutorId", requireAuth, requireRole("tutor"), async (req, res, next) => {
   try {
-    const {
-      name,
-      photoUrl,
-      subject,
-      institution,
-      experience,
-      location,
-      teachingMode,
-      hourlyRate,
-      totalSlots,
-      sessionStartDate,
-      availability,
-      timeZone
-    } = req.body;
-    const rate = Number(hourlyRate);
-    const slotCount = Number(totalSlots);
-    const yearsExperience = Number(experience);
-    if (
-      typeof name !== "string" || !name.trim() ||
-      typeof photoUrl !== "string" || !photoUrl.trim() ||
-      typeof subject !== "string" || !subject.trim() ||
-      typeof institution !== "string" || !institution.trim() ||
-      typeof location !== "string" || !location.trim() ||
-      !Number.isFinite(yearsExperience) || yearsExperience < 0 || yearsExperience > 80 ||
-      !Number.isFinite(rate) || rate <= 0 ||
-      !Number.isSafeInteger(slotCount) || slotCount < 1 ||
-      !["Online", "Offline", "Both"].includes(teachingMode)
-    ) {
-      return res.status(400).json({ message: "Complete all tutor details with valid hourly fee, experience, and total slots." });
+    if (!mongoose.isValidObjectId(req.params.tutorId)) {
+      return res.status(404).json({ message: "Tutor not found." });
     }
-    try {
-      const parsedPhotoUrl = new URL(photoUrl);
-      if (!["http:", "https:"].includes(parsedPhotoUrl.protocol)) throw new Error("Unsupported URL protocol");
-    } catch {
-      return res.status(400).json({ message: "Provide a valid HTTP or HTTPS tutor photo URL." });
-    }
-    if (typeof timeZone !== "string" || !DateTime.now().setZone(timeZone).isValid) {
-      return res.status(400).json({ message: "Provide a valid tutor timezone." });
-    }
-    if (typeof sessionStartDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(sessionStartDate)) {
-      return res.status(400).json({ message: "Choose a valid session start date." });
-    }
-    const parsedStartDate = DateTime.fromISO(sessionStartDate, { zone: timeZone });
-    if (
-      !parsedStartDate.isValid ||
-      parsedStartDate.toISODate() !== sessionStartDate ||
-      sessionStartDate < DateTime.now().setZone(timeZone).toISODate()
-    ) {
-      return res.status(400).json({ message: "Choose a valid session start date." });
-    }
-    if (!Array.isArray(availability) || availability.length === 0) {
-      return res.status(400).json({ message: "Add at least one weekly availability window." });
-    }
-    const days = new Set();
-    for (const window of availability) {
-      if (
-        !Number.isInteger(window.dayOfWeek) || window.dayOfWeek < 0 || window.dayOfWeek > 6 ||
-        days.has(window.dayOfWeek) ||
-        typeof window.startTime !== "string" || !timePattern.test(window.startTime) ||
-        typeof window.endTime !== "string" || !timePattern.test(window.endTime) ||
-        window.startTime >= window.endTime
-      ) {
-        return res.status(400).json({ message: "Each weekday must have one valid start/end availability window." });
-      }
-      const startMinute = Number(window.startTime.slice(0, 2)) * 60 + Number(window.startTime.slice(3));
-      const endMinute = Number(window.endTime.slice(0, 2)) * 60 + Number(window.endTime.slice(3));
-      if (startMinute % 60 !== 0 || endMinute % 60 !== 0) {
-        return res.status(400).json({
-          message: "Each weekly availability window must start and end on the hour."
-        });
-      }
-      days.add(window.dayOfWeek);
+    const parsed = validateTutorPayload(req.body, { allowPastStartDate: true, allowZeroSlots: true });
+    if (parsed.error) return res.status(400).json({ message: parsed.error });
+
+    const currentTutor = await Tutor.findOne({
+      _id: req.params.tutorId,
+      createdBy: req.userId,
+      isActive: { $ne: false }
+    });
+    if (!currentTutor) return res.status(404).json({ message: "Tutor not found." });
+
+    const confirmedBookings = await Booking.find({
+      tutor: currentTutor._id,
+      status: { $nin: ["cancelled", "Cancelled"] }
+    }).select("startsAt");
+    const { availability, timeZone, sessionStartDate } = parsed.value;
+    if (confirmedBookings.some(({ startsAt }) => (
+      !isStartOnOrAfterSessionDate(startsAt, timeZone, sessionStartDate) ||
+      !isStartWithinAvailability(startsAt, timeZone, availability, sessionStartDate)
+    ))) {
+      return res.status(409).json({
+        message: "This update would make an existing confirmed session unavailable. Keep its date and time covered."
+      });
     }
 
+    const tutor = await Tutor.findOneAndUpdate(
+      { _id: currentTutor._id, createdBy: req.userId, isActive: { $ne: false } },
+      { $set: { ...parsed.value, name: req.userName } },
+      { new: true, runValidators: true }
+    );
+    if (!tutor) return res.status(404).json({ message: "Tutor not found." });
+    return res.json({ tutor: serializeTutor(tutor), message: "Tutor updated successfully." });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.delete("/:tutorId", requireAuth, requireRole("tutor"), async (req, res, next) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.tutorId)) {
+      return res.status(404).json({ message: "Tutor not found." });
+    }
+    const currentTutor = await Tutor.findOne({
+      _id: req.params.tutorId,
+      createdBy: req.userId,
+      isActive: { $ne: false }
+    }).select("totalSlots pendingBookingReservations");
+    if (!currentTutor) return res.status(404).json({ message: "Tutor not found." });
+
+    const confirmedBooking = await Booking.exists({
+      tutor: currentTutor._id,
+      status: { $nin: ["cancelled", "Cancelled"] }
+    });
+    if (confirmedBooking) {
+      return res.status(409).json({
+        message: "This tutor has confirmed sessions and cannot be removed until they are cancelled."
+      });
+    }
+
+    const result = await Tutor.updateOne(
+      {
+        _id: currentTutor._id,
+        createdBy: req.userId,
+        isActive: { $ne: false },
+        totalSlots: currentTutor.totalSlots,
+        pendingBookingReservations: { $in: [0, null] }
+      },
+      { $set: { isActive: false } }
+    );
+    if (result.modifiedCount !== 1) {
+      return res.status(409).json({ message: "This tutor changed while you were removing it. Refresh and try again." });
+    }
+    return res.json({ message: "Tutor removed successfully." });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post("/", requireAuth, requireRole("tutor"), async (req, res, next) => {
+  try {
+    const parsed = validateTutorPayload(req.body);
+    if (parsed.error) return res.status(400).json({ message: parsed.error });
     const tutor = await Tutor.create({
       createdBy: req.userId,
-      name: name.trim(),
-      photoUrl: photoUrl.trim(),
-      subject: subject.trim(),
-      institution: institution.trim(),
-      experience: yearsExperience,
-      location: location.trim(),
-      teachingMode,
-      hourlyRate: rate,
-      totalSlots: slotCount,
-      sessionStartDate,
-      timeZone,
-      availability
+      ...parsed.value,
+      name: req.userName
     });
-    return res.status(201).json({ tutor });
+    return res.status(201).json({ tutor: serializeTutor(tutor), message: "Your tutor profile was created successfully." });
   } catch (error) {
     return next(error);
   }

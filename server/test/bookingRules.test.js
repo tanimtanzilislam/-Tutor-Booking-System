@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 import {
   isStartWithinAvailability,
   isStartOnOrAfterSessionDate,
-  isTutorSessionDateReached,
+  normalizeSessionStartDate,
   oneHourSessionsOverlap
 } from "../src/bookingRules.js";
 
@@ -45,12 +45,21 @@ test("does not offer a recurring weekday before the session start date", () => {
   assert.equal(isStartOnOrAfterSessionDate(tutorLocalStart(19, 10), timezone, "2026-10-13"), true);
 });
 
-test("blocks booking until the tutor-local session start date", () => {
-  const beforeStartDate = new Date("2026-10-11T21:30:00.000Z");
-  const startDateDay = new Date("2026-10-12T00:00:00.000Z");
-  assert.equal(isTutorSessionDateReached(beforeStartDate, timezone, "2026-10-12"), false);
-  assert.equal(isTutorSessionDateReached(startDateDay, timezone, "2026-10-12"), true);
-  assert.equal(isTutorSessionDateReached(beforeStartDate, timezone, undefined), true);
+test("compares ISO datetime start-date values by their stored calendar date", () => {
+  const sessionStartDate = "2026-10-12T00:00:00.000Z";
+  assert.equal(isStartOnOrAfterSessionDate(tutorLocalStart(12, 10), timezone, sessionStartDate), true);
+  assert.equal(isStartOnOrAfterSessionDate(tutorLocalStart(11, 10), timezone, sessionStartDate), false);
+});
+
+test("normalizes legacy dates cast to a Mongoose JavaScript date string", () => {
+  const legacyDate = "Mon Oct 12 2026 06:00:00 GMT+0600 (Bangladesh Standard Time)";
+  assert.equal(normalizeSessionStartDate(legacyDate), "2026-10-12");
+  assert.equal(isStartOnOrAfterSessionDate(tutorLocalStart(12, 10), timezone, legacyDate), true);
+});
+
+test("allows booking in advance for a session on or after the tutor's start date", () => {
+  const firstSessionDay = tutorLocalStart(19, 10);
+  assert.equal(isStartWithinAvailability(firstSessionDay, timezone, mondayMorning, "2026-10-13"), true);
 });
 
 test("treats one-hour sessions that touch at the boundary as non-conflicting", () => {

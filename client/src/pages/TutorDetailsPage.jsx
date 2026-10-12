@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { DateTime } from "luxon";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api.js";
 import { useAuth } from "../auth/AuthContext.jsx";
@@ -37,15 +36,9 @@ export default function TutorDetailsPage() {
 
   const choices = useMemo(() => tutor ? availableStarts(tutor) : [], [tutor]);
   const remainingSlots = tutor && Number.isInteger(tutor.totalSlots) ? tutor.totalSlots : 0;
-  const sessionNotStarted = Boolean(
-    tutor?.sessionStartDate &&
-    DateTime.now().setZone(tutor.timeZone).toISODate() < tutor.sessionStartDate
-  );
   const bookingUnavailableMessage = remainingSlots <= 0
     ? "No available slots left. This session is fully booked. You can’t join at the moment."
-    : sessionNotStarted
-      ? "Booking is not available yet for this tutor."
-      : "";
+    : "";
 
   async function bookSession(event) {
     event.preventDefault();
@@ -127,7 +120,7 @@ export default function TutorDetailsPage() {
           </section>
         </article>
 
-        <aside className="session-booking-card" data-reveal>
+        {user?.role !== "tutor" && <aside className="session-booking-card" data-reveal>
           <p className="section-kicker">Make it official</p>
           <h2>Book a session</h2>
           <p className="booking-intro">Choose one of the tutor’s one-hour sessions. Available times are shown in your local timezone.</p>
@@ -167,14 +160,14 @@ export default function TutorDetailsPage() {
             {sessionToken && (
               <p className="form-success" role="status">
                 Session booked. Status: {bookingStatus}. Your token is <code className="inline-token">{sessionToken}</code>.{" "}
-                <Link to="/my-sessions">View sessions</Link>
+                {user?.role === "student" && <Link to="/my-sessions">View sessions</Link>}
               </p>
             )}
             {sessionToken && remainingSlots === 0 && (
               <p className="empty-slots" role="status">This session is fully booked. You can’t join at the moment.</p>
             )}
           </form>
-        </aside>
+        </aside>}
       </div>
     </section>
   );

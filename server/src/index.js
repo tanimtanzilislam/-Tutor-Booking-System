@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.js";
 import tutorRoutes from "./routes/tutors.js";
 import bookingRoutes from "./routes/bookings.js";
 import Booking from "./models/Booking.js";
+import Tutor from "./models/Tutor.js";
 import User from "./models/User.js";
 
 const { MONGODB_URI, JWT_SECRET, PORT = 5000, CLIENT_ORIGIN = "http://localhost:5173" } = process.env;
@@ -31,6 +32,13 @@ app.use((error, _req, res, _next) => {
 });
 
 await mongoose.connect(MONGODB_URI);
+const existingTutorOwners = await Tutor.distinct("createdBy");
+if (existingTutorOwners.length) {
+  await User.updateMany(
+    { _id: { $in: existingTutorOwners }, role: { $exists: false } },
+    { $set: { role: "tutor" } }
+  );
+}
 const bookingCollectionExists = await mongoose.connection.db
   .listCollections({ name: Booking.collection.collectionName }, { nameOnly: true })
   .toArray();

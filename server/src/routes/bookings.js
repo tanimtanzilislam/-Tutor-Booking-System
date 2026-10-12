@@ -1,21 +1,22 @@
 import { Router } from "express";
 import { randomBytes } from "node:crypto";
 import mongoose from "mongoose";
+import { DateTime } from "luxon";
 import Booking from "../models/Booking.js";
 import Tutor from "../models/Tutor.js";
 import User from "../models/User.js";
-import requireAuth from "../middleware/requireAuth.js";
+import requireAuth, { requireRole } from "../middleware/requireAuth.js";
 import {
   isOnTutorLocalHour,
+  normalizeSessionStartDate,
   isStartOnOrAfterSessionDate,
   isStartWithinAvailability,
-  isTutorSessionDateReached,
   oneHourSessionsOverlap
 } from "../bookingRules.js";
 
 const router = Router();
 
-router.get("/mine", requireAuth, async (req, res, next) => {
+router.get("/mine", requireAuth, requireRole("student"), async (req, res, next) => {
   try {
     const bookings = await Booking.find({ student: req.userId })
       .populate("tutor", "name subject hourlyRate timeZone")
@@ -26,7 +27,7 @@ router.get("/mine", requireAuth, async (req, res, next) => {
   }
 });
 
-router.patch("/:bookingId/cancel", requireAuth, async (req, res, next) => {
+router.patch("/:bookingId/cancel", requireAuth, requireRole("student"), async (req, res, next) => {
   try {
     if (!mongoose.isValidObjectId(req.params.bookingId)) {
       return res.status(404).json({ message: "Booking not found." });
@@ -69,7 +70,7 @@ router.patch("/:bookingId/cancel", requireAuth, async (req, res, next) => {
   }
 });
 
-router.post("/", requireAuth, async (req, res, next) => {
+router.post("/", requireAuth, requireRole("student"), async (req, res, next) => {
   try {
     const { tutorId, startsAt, phone } = req.body;
     if (typeof tutorId !== "string" || typeof startsAt !== "string" || typeof phone !== "string") {
@@ -89,20 +90,26 @@ router.post("/", requireAuth, async (req, res, next) => {
       return res.status(400).json({ message: "Choose a valid session time in the future." });
     }
 
-    const tutor = await Tutor.findById(tutorId);
+    const tutor = await Tutor.findOne({ _id: tutorId, isActive: { $ne: false } });
     if (!tutor) return res.status(404).json({ message: "Tutor not found." });
 
-    if (!isTutorSessionDateReached(new Date(), tutor.timeZone, tutor.sessionStartDate)) {
-      return res.status(409).json({ message: "Booking is not available yet for this tutor." });
-    }
     if (!Number.isInteger(tutor.totalSlots) || tutor.totalSlots <= 0) {
       return res.status(409).json({ message: "No available slots left." });
     }
     if (!isOnTutorLocalHour(start, tutor.timeZone)) {
       return res.status(400).json({ message: "Sessions must start on the hour." });
     }
-    if (!isStartOnOrAfterSessionDate(start, tutor.timeZone, tutor.sessionStartDate)) {
-      return res.status(409).json({ message: "Booking is not available yet for this tutor." });
+    const sessionStartDate = normalizeSessionStartDate(tutor.sessionStartDate);
+    if (!sessionStartDate && tutor.sessionStartDate) {
+      return res.status(409).json({
+        message: "This tutor's saved session start date is invalid. Ask the tutor to review their profile."
+      });
+    }
+    if (!isStartOnOrAfterSessionDate(start, tutor.timeZone, sessionStartDate)) {
+      const selectedDate = DateTime.fromJSDate(start, { zone: tutor.timeZone }).toISODate();
+      return res.status(409).json({
+        message: `The selected session date (${selectedDate}) is before this tutor's start date (${sessionStartDate}) in ${tutor.timeZone}.`
+      });
     }
     if (!isStartWithinAvailability(
       start,
@@ -129,8 +136,8 @@ router.post("/", requireAuth, async (req, res, next) => {
     if (!student) return res.status(401).json({ message: "Student account not found." });
 
     const reservation = await Tutor.updateOne(
-      { _id: tutor._id, totalSlots: { $gt: 0 } },
-      { $inc: { totalSlots: -1 } }
+      { _id: tutor._id, isActive: { $ne: false }, totalSlots: { $gt: 0 } },
+      { $inc: { totalSlots: -1, pendingBookingReservations: 1 } }
     );
     if (reservation.modifiedCount !== 1) {
       return res.status(409).json({ message: "No available slots left." });
@@ -149,11 +156,21 @@ router.post("/", requireAuth, async (req, res, next) => {
         status: "confirmed"
       });
     } catch (error) {
-      await Tutor.updateOne({ _id: tutor._id }, { $inc: { totalSlots: 1 } });
+      await Tutor.updateOne(
+        { _id: tutor._id, pendingBookingReservations: { $gt: 0 } },
+        { $inc: { totalSlots: 1, pendingBookingReservations: -1 } }
+      );
       if (error?.code === 11000) {
         return res.status(409).json({ message: "That tutor already has a booking for this time." });
       }
       return next(error);
+    }
+    const reservationReleased = await Tutor.updateOne(
+      { _id: tutor._id, pendingBookingReservations: { $gt: 0 } },
+      { $inc: { pendingBookingReservations: -1 } }
+    );
+    if (reservationReleased.modifiedCount !== 1) {
+      return next(new Error("The tutor booking reservation could not be finalized."));
     }
     await booking.populate("tutor", "name subject hourlyRate timeZone totalSlots");
     return res.status(201).json({ booking });

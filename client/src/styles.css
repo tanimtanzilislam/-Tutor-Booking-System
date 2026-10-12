@@ -157,7 +157,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .auth-card > h1 { margin: 0 0 12px; font: 700 31px var(--serif); letter-spacing: -1px; }
 .auth-card form, .editor-card { display: grid; gap: 17px; }
 .auth-card form > label, .editor-card > label, .form-fields-two > label { display: grid; gap: 8px; color: var(--ink); font-size: 12px; font-weight: 700; }
-.auth-card input { min-height: 47px; padding: 0 13px; border: 1px solid #dfe7df; border-radius: 6px; background: white; font-size: 13px; }
+.auth-card input, .auth-card select { min-height: 47px; padding: 0 13px; border: 1px solid #dfe7df; border-radius: 6px; background: white; font-size: 13px; }
 .password-hint { margin: -11px 0 -9px; color: var(--muted); font-size: 10px; line-height: 1.6; }
 .optional { color: var(--muted); font-weight: 400; }
 .auth-divider { display: flex; align-items: center; gap: 12px; margin-block: 19px 15px; color: #87938c; font-size: 10px; }
@@ -868,6 +868,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 [data-theme="dark"] .booking-form input,
 [data-theme="dark"] .booking-form select,
 [data-theme="dark"] .auth-card input,
+[data-theme="dark"] .auth-card select,
 [data-theme="dark"] .editor-card input:not([type="checkbox"]),
 [data-theme="dark"] .editor-card select,
 [data-theme="dark"] .editor-card textarea,
@@ -1003,4 +1004,53 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   }
   .tutor-grid > .tutor-card[data-revealed="true"]:nth-child(3n + 2),
   .tutor-grid > .tutor-card[data-revealed="true"]:nth-child(3n) { transition-delay: 0s; }
+}
+
+.management-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: white;
+}
+.management-table { width: 100%; border-collapse: collapse; text-align: left; }
+.management-table th, .management-table td { padding: 14px; border-bottom: 1px solid var(--line); color: var(--ink); font-size: 12px; vertical-align: middle; }
+.management-table th { background: #f1f4ef; color: #5c7164; font-size: 10px; letter-spacing: .45px; text-transform: uppercase; white-space: nowrap; }
+.management-table tbody tr:last-child td { border-bottom: 0; }
+.managed-tutor { display: flex; min-width: 175px; align-items: center; gap: 11px; font-weight: 700; }
+.managed-tutor img { width: 44px; height: 44px; flex: none; border-radius: 7px; object-fit: cover; }
+.management-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.management-actions .button, .form-actions .button { min-height: 38px; padding-inline: 13px; font-size: 11px; }
+.button-outline { border-color: var(--line); background: transparent; color: var(--ink); }
+.button-outline:hover { border-color: var(--green); background: color-mix(in srgb, var(--green) 8%, transparent); }
+.button-danger-outline { border-color: #e7c8c4; background: transparent; color: #9c3f35; }
+.button-danger-outline:hover { background: #fbecea; }
+.button-danger { background: #a33d33; color: white; }
+.button-danger:hover { background: #8d3028; }
+.form-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; }
+.management-modal { width: min(900px, 100%); max-height: calc(100vh - 40px); overflow-y: auto; padding: 28px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); box-shadow: 0 20px 60px #10251f30; animation: modal-panel-in .3s cubic-bezier(.2, .7, .2, 1) both; }
+.management-modal-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
+.management-modal-heading h2 { margin: 0; color: var(--ink); font: 700 25px var(--serif); }
+.management-modal-heading .section-kicker { margin-bottom: 8px; color: var(--green); }
+.modal-close { display: grid; width: 38px; height: 38px; flex: none; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; font-size: 24px; line-height: 1; }
+.modal-close:disabled { cursor: wait; opacity: .6; }
+.management-modal .editor-card { max-width: none; padding: 0; border: 0; background: transparent; }
+.delete-confirmation { width: min(480px, 100%); }
+.delete-confirmation > p { color: var(--muted); font-size: 13px; line-height: 1.7; }
+.management-load-error { display: grid; justify-items: center; gap: 12px; padding-block: 35px; }
+[data-theme="dark"] .management-table-wrap,
+[data-theme="dark"] .management-modal { border-color: var(--line); background: #1b272e; }
+[data-theme="dark"] .management-table th { background: #25333a; color: var(--muted); }
+[data-theme="dark"] .management-table td { border-color: var(--line); }
+[data-theme="dark"] .management-modal .editor-card { background: transparent; }
+
+@media (max-width: 640px) {
+  .management-table th, .management-table td { padding: 10px 9px; }
+  .management-modal { padding: 19px; }
+  .management-modal .form-fields-two { grid-template-columns: 1fr; }
+  .management-modal .availability-row { grid-template-columns: 1fr; gap: 8px; padding-block: 10px; }
+  .management-modal .time-inputs { max-width: 265px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .management-modal { animation: none; }
 }

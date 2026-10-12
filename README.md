@@ -27,6 +27,7 @@ For local Google OAuth, register `http://localhost:5000/api/auth/google/callback
 ## Implemented flows
 
 - Student registration, login, session restoration, and logout
+- Accounts choose a student or tutor role at registration; tutor-management and student-booking sections are restricted by role
 - JWT sessions for password and Google login; bearer tokens are persisted on the client and verified by middleware on protected API routes
 - Registration requires a name, email, photo URL, and password; successful registration returns to Login
 - Google OAuth login (requires Google OAuth credentials)
@@ -37,7 +38,9 @@ For local Google OAuth, register `http://localhost:5000/api/auth/google/callback
 - A home-page featured tutor section that retrieves up to six recent tutors using a MongoDB aggregation `$limit` stage
 - Tutor detail pages with weekly availability and one-hour booking
 - Homepage subject links that open the tutor directory with the subject filter applied
-- Authenticated tutor creation with photo URL, subject, institution, experience, location, teaching mode, hourly fee, session start date, total booking capacity, and weekly availability
+- Tutor-only listing creation with photo URL, subject, institution, experience, location, teaching mode, hourly fee, session start date, total booking capacity, and weekly availability
+- A private My Tutors table for the signed-in user's own tutor listings, with full-field editing and confirmed removal
+- Tutor ownership checks on listing updates/removal; removal hides the profile while retaining booking history and is blocked while confirmed sessions exist
 - One-hour bookings, checked against the tutor's recurring availability and existing bookings on the API
 - Private tutor-detail booking form with student and tutor details, validated phone number, generated booking status, and a remaining-capacity counter decremented on successful booking
 - A private booked-sessions table scoped to the signed-in student, with confirmed/cancelled status and confirmation before cancellation
@@ -45,15 +48,17 @@ For local Google OAuth, register `http://localhost:5000/api/auth/google/callback
 - A unique session token for every booking
 - Authenticated profile and booked-session pages
 
-Tutor availability is saved in the timezone of the tutor's browser when the tutor is added. Available booking times are displayed in the student's browser timezone. A booking is accepted only if it starts on the hour, falls within the tutor's weekly availability, is on or after the tutor's session start date, does not overlap another booking, and remaining total booking capacity is available. Capacity is decremented atomically after checks, and each available weekday's schedule repeats weekly from the session start date.
+Tutor availability is saved in the timezone of the tutor's browser when the tutor is added. Available booking times are displayed in the student's browser timezone. Students can book in advance; the selected session must start on the hour, fall within the tutor's weekly availability, be on or after the tutor's session start date, not overlap another booking, and have remaining total booking capacity. Capacity is decremented atomically after checks, and each available weekday's schedule repeats weekly from the session start date.
+
+Tutor session start dates are stored and returned as date-only values. Legacy MongoDB date values are normalized to their UTC calendar date when tutor profiles are returned or bookings are checked.
 
 Cancelling a confirmed booking changes its status and restores one remaining tutor booking slot. Cancelled bookings do not block the same tutor time from being booked again.
 
-`My Tutors` is an authenticated placeholder because no additional behavior for that page was specified.
-
 The homepage also includes subject exploration and session-preparation sections. Tutor cards link to their detail pages, where students can choose an available session and book it.
+
+No live deployment URL is configured for this project yet.
 
 ## Validation
 
 - `npm run build` builds the client for production.
-- `npm test --prefix server` runs the booking availability and conflict-rule tests.
+- `npm test --prefix server` runs the booking availability/conflict and tutor input-validation tests.
