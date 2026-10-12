@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { api } from "../api.js";
+import { API_BASE, api } from "../api.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { ErrorMessage } from "../components/PageState.jsx";
 import { useToast } from "../components/ToastContext.jsx";
@@ -38,7 +38,7 @@ export default function AuthPage({ mode }) {
 
   function continueWithGoogle() {
     const returnTo = location.state?.from || "/";
-    window.location.assign(`/api/auth/google?returnTo=${encodeURIComponent(returnTo)}`);
+    window.location.assign(`${API_BASE}/auth/google?returnTo=${encodeURIComponent(returnTo)}`);
   }
 
   async function submit(event) {

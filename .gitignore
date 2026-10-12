@@ -3,6 +3,8 @@ node_modules/
 client/dist/
 client/node_modules/
 .client-git-metadata-backup/
+.vercel/
+**/.vercel/
 .env*
 **/.env*
 !.env.example

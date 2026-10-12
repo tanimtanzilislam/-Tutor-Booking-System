@@ -24,6 +24,23 @@ Subtle reveal, carousel, card, and modal animations support the visual system; u
 The API allows the client origin in `CLIENT_ORIGIN` (default `http://localhost:5173`). The frontend proxies `/api` requests to `http://localhost:5000` during development.
 For local Google OAuth, register `http://localhost:5000/api/auth/google/callback` as an authorized redirect URI in your Google Cloud OAuth web client. Add the OAuth values to your existing `server/.env`; do not replace its MongoDB connection or JWT secret.
 
+## Deploy to Vercel
+
+Deploy this monorepo as two Vercel projects so the Vite client and Express API can use their respective build runtimes:
+
+Production deployments:
+
+- Frontend: https://tutor-booking-client-navy.vercel.app
+- API: https://tutor-booking-api-delta.vercel.app
+
+1. Import the Git repository twice in Vercel. Set the Root Directory to `client` for the frontend project and `server` for the API project.
+2. Deploy the API project and add these Production environment variables in Vercel before its first successful production deployment: `MONGODB_URI`, `JWT_SECRET`, and `CLIENT_ORIGIN`. Set `CLIENT_ORIGIN` to the frontend's Vercel URL (for example, `https://your-client.vercel.app`). The database must be reachable from Vercel.
+3. Add `VITE_API_BASE_URL` to the frontend project's Production environment variables, set to the API deployment origin plus `/api` (for example, `https://your-api.vercel.app/api`), then redeploy the frontend.
+4. For Google sign-in, the API project has `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_CALLBACK_URL` configured. Add `https://tutor-booking-api-delta.vercel.app/api/auth/google/callback` to the authorized redirect URIs and `https://tutor-booking-client-navy.vercel.app` to the authorized JavaScript origins in the Google Cloud OAuth client.
+5. In MongoDB Atlas, allow network access from the Vercel API or configure suitable Vercel static egress for the project. Do not commit environment variables or credentials.
+
+The API's Vercel configuration routes `/api/*` requests to its Express function; the frontend configuration falls back to `index.html` for React Router routes. The client uses `/api` by default for local development. `VITE_API_BASE_URL` is needed when the frontend and API are deployed separately.
+
 ## Implemented flows
 
 - Student registration, login, session restoration, and logout
