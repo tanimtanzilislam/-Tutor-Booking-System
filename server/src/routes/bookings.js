@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto";
 import mongoose from "mongoose";
 import { DateTime } from "luxon";
 import Booking from "../models/Booking.js";
+import Notification from "../models/Notification.js";
 import Tutor from "../models/Tutor.js";
 import User from "../models/User.js";
 import requireAuth, { requireRole } from "../middleware/requireAuth.js";
@@ -155,11 +156,51 @@ router.post("/", requireAuth, requireRole("student"), async (req, res, next) => 
         sessionToken: randomBytes(12).toString("hex").toUpperCase(),
         status: "confirmed"
       });
+      await Notification.create({
+        recipient: tutor.createdBy,
+        booking: booking._id,
+        tutor: tutor._id,
+        studentName: student.name,
+        subject: tutor.subject,
+        startsAt: start,
+        timeZone: tutor.timeZone
+      });
     } catch (error) {
-      await Tutor.updateOne(
-        { _id: tutor._id, pendingBookingReservations: { $gt: 0 } },
-        { $inc: { totalSlots: 1, pendingBookingReservations: -1 } }
-      );
+      const rollbackErrors = [];
+      let bookingDeleted = !booking;
+      if (booking) {
+        try {
+          const result = await Booking.deleteOne({ _id: booking._id });
+          bookingDeleted = result.deletedCount === 1;
+          if (!bookingDeleted) rollbackErrors.push(new Error("The failed booking could not be removed."));
+        } catch (rollbackError) {
+          rollbackErrors.push(rollbackError);
+        }
+      }
+      try {
+        await Notification.deleteOne({ booking: booking?._id });
+      } catch (rollbackError) {
+        rollbackErrors.push(rollbackError);
+      }
+      if (bookingDeleted) {
+        try {
+          const reservationRestored = await Tutor.updateOne(
+            { _id: tutor._id, pendingBookingReservations: { $gt: 0 } },
+            { $inc: { totalSlots: 1, pendingBookingReservations: -1 } }
+          );
+          if (reservationRestored.modifiedCount !== 1) {
+            rollbackErrors.push(new Error("The tutor booking capacity could not be restored."));
+          }
+        } catch (rollbackError) {
+          rollbackErrors.push(rollbackError);
+        }
+      }
+      if (rollbackErrors.length) {
+        return next(new AggregateError(
+          [error, ...rollbackErrors],
+          "Booking creation failed and its notification or capacity reservation could not be rolled back."
+        ));
+      }
       if (error?.code === 11000) {
         return res.status(409).json({ message: "That tutor already has a booking for this time." });
       }

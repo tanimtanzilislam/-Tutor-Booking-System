@@ -5,7 +5,9 @@ import mongoose from "mongoose";
 import authRoutes from "./routes/auth.js";
 import tutorRoutes from "./routes/tutors.js";
 import bookingRoutes from "./routes/bookings.js";
+import notificationRoutes from "./routes/notifications.js";
 import Booking from "./models/Booking.js";
+import Notification from "./models/Notification.js";
 import Tutor from "./models/Tutor.js";
 import User from "./models/User.js";
 
@@ -22,6 +24,7 @@ app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 app.use("/api/auth", authRoutes);
 app.use("/api/tutors", tutorRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use((error, _req, res, _next) => {
   console.error(error);
@@ -52,5 +55,5 @@ if (bookingCollectionExists.length) {
   }
   await Booking.updateMany({ status: "Confirmed" }, { $set: { status: "confirmed" } });
 }
-await Promise.all([User.init(), Booking.init()]);
+await Promise.all([User.init(), Booking.init(), Notification.init()]);
 app.listen(PORT, () => console.log(`MediQueue API listening on port ${PORT}`));

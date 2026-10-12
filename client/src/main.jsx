@@ -6,6 +6,7 @@ import { AuthProvider } from "./auth/AuthContext.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import { ToastProvider } from "./components/ToastContext.jsx";
 import { ThemeProvider } from "./theme/ThemeContext.jsx";
+import { NotificationProvider } from "./notifications/NotificationContext.jsx";
 import "./styles.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -14,7 +15,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <ToastProvider>
         <ThemeProvider>
           <ErrorBoundary>
-            <AuthProvider><App /></AuthProvider>
+            <AuthProvider>
+              <NotificationProvider><App /></NotificationProvider>
+            </AuthProvider>
           </ErrorBoundary>
         </ThemeProvider>
       </ToastProvider>

@@ -58,6 +58,20 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .profile-dropdown a, .profile-dropdown button { padding: 11px 12px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); text-align: left; text-decoration: none; font-size: 13px; cursor: pointer; }
 .profile-dropdown a:hover, .profile-dropdown button:hover { background: #f2f6ef; }
 .status-banner { margin-block: 15px 0; padding: 12px 16px; border: 1px solid #f0d6ae; border-radius: 8px; background: #fff8ed; color: #835522; font-size: 13px; }
+.notification-nav-link { display: inline-flex; align-items: center; gap: 7px; }
+.notification-badge { display: inline-grid; min-width: 19px; height: 19px; place-items: center; padding-inline: 4px; border-radius: 10px; background: var(--coral); color: white; font-size: 10px; font-weight: 700; }
+.notification-list { display: grid; gap: 13px; }
+.notification-card { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 21px 23px; border: 1px solid var(--line); border-radius: 10px; background: white; }
+.notification-unread { border-left: 4px solid var(--green); background: color-mix(in srgb, var(--green) 5%, white); }
+.notification-card-content { min-width: 0; }
+.notification-card-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.notification-card h2 { margin: 0; color: var(--ink); font: 700 17px var(--serif); }
+.notification-new { padding: 4px 8px; border-radius: 12px; background: #e8f1e7; color: var(--green); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.notification-card p { margin: 10px 0 0; color: var(--muted); font-size: 13px; }
+.notification-card .notification-session-time { color: var(--ink); font-weight: 600; }
+.notification-created-at { display: block; margin-top: 9px; color: var(--muted); font-size: 11px; }
+.notification-actions { display: flex; flex: none; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.notification-actions .button { min-height: 38px; padding-inline: 12px; font-size: 11px; }
 
 .hero { position: relative; min-height: 560px; margin-top: 28px; overflow: hidden; border-radius: 16px; background: #294d42; color: white; }
 .hero-image, .hero-shade { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -894,6 +908,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 [data-theme="dark"] .profile-dropdown button { color: var(--ink); }
 [data-theme="dark"] .profile-dropdown a:hover,
 [data-theme="dark"] .profile-dropdown button:hover { background: #26343a; }
+[data-theme="dark"] .notification-card { border-color: var(--line); background: #1b272e; }
+[data-theme="dark"] .notification-unread { background: color-mix(in srgb, var(--green) 12%, #1b272e); }
+[data-theme="dark"] .notification-new { background: #263f38; color: #a6cba9; }
 [data-theme="dark"] .sessions-table th { background: #25333a; color: var(--muted); }
 [data-theme="dark"] .sessions-table th,
 [data-theme="dark"] .sessions-table td { border-bottom-color: var(--line); }
@@ -1049,6 +1066,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .management-modal .form-fields-two { grid-template-columns: 1fr; }
   .management-modal .availability-row { grid-template-columns: 1fr; gap: 8px; padding-block: 10px; }
   .management-modal .time-inputs { max-width: 265px; }
+  .notification-card { align-items: stretch; flex-direction: column; gap: 17px; padding: 17px; }
+  .notification-actions { justify-content: flex-start; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { useNotifications } from "../notifications/NotificationContext.jsx";
 import { useTheme } from "../theme/ThemeContext.jsx";
 
 function Avatar({ user, className = "" }) {
@@ -14,6 +15,7 @@ function Avatar({ user, className = "" }) {
 export default function Navbar() {
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { unreadCount } = useNotifications();
   const navigate = useNavigate();
 
   function logout() {
@@ -37,6 +39,10 @@ export default function Navbar() {
                 <>
                   <NavLink to="/add-tutor">Create Tutor Profile</NavLink>
                   <NavLink to="/my-tutors">My Tutor Profile</NavLink>
+                  <NavLink className="notification-nav-link" to="/notifications">
+                    Notifications
+                    {unreadCount > 0 && <span className="notification-badge" aria-label={`${unreadCount} unread`}>{unreadCount > 99 ? "99+" : unreadCount}</span>}
+                  </NavLink>
                 </>
               )}
               {user.role === "student" && <NavLink to="/my-sessions">My Booked Sessions</NavLink>}

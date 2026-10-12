@@ -44,6 +44,7 @@ For local Google OAuth, register `http://localhost:5000/api/auth/google/callback
 - One-hour bookings, checked against the tutor's recurring availability and existing bookings on the API
 - Private tutor-detail booking form with student and tutor details, validated phone number, generated booking status, and a remaining-capacity counter decremented on successful booking
 - A private booked-sessions table scoped to the signed-in student, with confirmed/cancelled status and confirmation before cancellation
+- Persistent in-app tutor notifications for new student bookings, with an unread badge, periodic updates, and mark-as-read controls
 - Dynamic page titles, a not-found/error view, loading spinner, and operation toasts
 - A unique session token for every booking
 - Authenticated profile and booked-session pages
@@ -61,4 +62,4 @@ No live deployment URL is configured for this project yet.
 ## Validation
 
 - `npm run build` builds the client for production.
-- `npm test --prefix server` runs the booking availability/conflict and tutor input-validation tests.
+- `npm test --prefix server` runs booking availability/conflict, tutor input-validation, and notification model tests.

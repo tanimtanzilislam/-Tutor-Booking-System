@@ -9,6 +9,7 @@ import GoogleCallbackPage from "./pages/GoogleCallbackPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import MySessionsPage from "./pages/MySessionsPage.jsx";
 import MyTutorsPage from "./pages/MyTutorsPage.jsx";
+import NotificationsPage from "./pages/NotificationsPage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import TutorDetailsPage from "./pages/TutorDetailsPage.jsx";
@@ -36,6 +37,7 @@ export default function App() {
         <Route path="auth/callback" element={<GoogleCallbackPage />} />
         <Route path="add-tutor" element={<Protected role="tutor"><AddTutorPage /></Protected>} />
         <Route path="my-tutors" element={<Protected role="tutor"><MyTutorsPage /></Protected>} />
+        <Route path="notifications" element={<Protected role="tutor"><NotificationsPage /></Protected>} />
         <Route path="my-sessions" element={<Protected role="student"><MySessionsPage /></Protected>} />
         <Route path="profile" element={<Protected><ProfilePage /></Protected>} />
         <Route path="error" element={<ErrorPage />} />

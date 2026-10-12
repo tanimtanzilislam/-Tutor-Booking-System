@@ -6,6 +6,7 @@ const routeTitles = {
   "/tutors": "Tutors",
   "/add-tutor": "Create Tutor Profile",
   "/my-tutors": "My Tutor Profile",
+  "/notifications": "Notifications",
   "/my-sessions": "My Booked Sessions",
   "/profile": "Profile",
   "/login": "Login",
