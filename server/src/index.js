@@ -63,6 +63,22 @@ if (bookingCollectionExists.length) {
   await Booking.updateMany({ status: "Confirmed" }, { $set: { status: "confirmed" } });
   await Booking.updateMany({ status: "Cancelled" }, { $set: { status: "cancelled" } });
 }
+const notificationCollectionExists = await mongoose.connection.db
+  .listCollections({ name: Notification.collection.collectionName }, { nameOnly: true })
+  .toArray();
+if (notificationCollectionExists.length) {
+  const notificationIndexes = await Notification.collection.indexes();
+  const legacyBookingIndex = notificationIndexes.find(
+    (index) => index.unique && index.key?.booking === 1 && Object.keys(index.key).length === 1
+  );
+  if (legacyBookingIndex) {
+    await Notification.collection.dropIndex(legacyBookingIndex.name);
+  }
+  await Notification.updateMany(
+    { eventType: { $exists: false } },
+    { $set: { eventType: "booking_request" } }
+  );
+}
 await Promise.all([User.init(), Notification.init()]);
 await Booking.createIndexes();
 app.listen(PORT, () => console.log(`MediQueue API listening on port ${PORT}`));

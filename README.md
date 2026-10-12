@@ -44,7 +44,7 @@ For local Google OAuth, register `http://localhost:5000/api/auth/google/callback
 - Student booking requests remain pending until the tutor confirms or declines; requests are checked against recurring availability and existing bookings on the API
 - Private tutor-detail booking form with student and tutor details, validated phone number, generated session token, and a remaining-capacity counter reserved while approval is pending
 - A private booked-sessions table scoped to the signed-in student, with pending/confirmed/rejected/cancelled statuses and confirmation before cancellation
-- Persistent in-app tutor notifications with the student's profile, an unread badge, periodic updates, mark-as-read controls, and confirm/decline actions
+- Persistent in-app tutor notifications for student booking requests and cancellations, including the student's profile, an unread badge, periodic updates, mark-as-read controls, and confirm/decline actions
 - Dynamic page titles, a not-found/error view, loading spinner, and operation toasts
 - A unique session token for every booking
 - Authenticated profile and booked-session pages

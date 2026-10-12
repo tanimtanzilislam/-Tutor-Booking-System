@@ -57,10 +57,73 @@ router.patch("/:bookingId/cancel", requireAuth, requireRole("student"), async (r
         throw new Error("The tutor capacity could not be restored for this cancellation.");
       }
     } catch (error) {
-      await Booking.updateOne(
+      const bookingRestored = await Booking.updateOne(
         { _id: booking._id, status: "cancelled" },
         { $set: { status: booking.status } }
       );
+      if (bookingRestored.modifiedCount !== 1) {
+        return next(new AggregateError(
+          [error, new Error("The booking cancellation could not be rolled back.")],
+          "Booking cancellation failed and its state could not be restored."
+        ));
+      }
+      return next(error);
+    }
+    let cancellationNotification;
+    try {
+      const tutor = await Tutor.findById(booking.tutor).select("createdBy subject timeZone");
+      if (!tutor) throw new Error("The tutor could not be found to notify them of this cancellation.");
+      cancellationNotification = await Notification.create({
+        recipient: tutor.createdBy,
+        booking: booking._id,
+        eventType: "booking_cancelled",
+        tutor: tutor._id,
+        student: booking.student,
+        studentName: booking.studentName,
+        subject: tutor.subject,
+        startsAt: booking.startsAt,
+        timeZone: tutor.timeZone
+      });
+    } catch (error) {
+      const rollbackErrors = [];
+      if (cancellationNotification) {
+        try {
+          const notificationRemoved = await Notification.deleteOne({ _id: cancellationNotification._id });
+          if (notificationRemoved.deletedCount !== 1) {
+            rollbackErrors.push(new Error("The failed cancellation notification could not be removed."));
+          }
+        } catch (rollbackError) {
+          rollbackErrors.push(rollbackError);
+        }
+      }
+      try {
+        const capacityRestored = await Tutor.updateOne(
+          { _id: booking.tutor, totalSlots: { $gt: 0 } },
+          { $inc: { totalSlots: -1 } }
+        );
+        if (capacityRestored.modifiedCount !== 1) {
+          rollbackErrors.push(new Error("The tutor's reserved capacity could not be restored."));
+        }
+      } catch (rollbackError) {
+        rollbackErrors.push(rollbackError);
+      }
+      try {
+        const bookingRestored = await Booking.updateOne(
+          { _id: booking._id, status: "cancelled" },
+          { $set: { status: booking.status } }
+        );
+        if (bookingRestored.modifiedCount !== 1) {
+          rollbackErrors.push(new Error("The booking cancellation could not be rolled back."));
+        }
+      } catch (rollbackError) {
+        rollbackErrors.push(rollbackError);
+      }
+      if (rollbackErrors.length) {
+        return next(new AggregateError(
+          [error, ...rollbackErrors],
+          "Cancellation notification failed and the booking cancellation could not be fully rolled back."
+        ));
+      }
       return next(error);
     }
     booking.status = "cancelled";

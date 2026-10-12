@@ -4,6 +4,12 @@ const notificationSchema = new mongoose.Schema(
   {
     recipient: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     booking: { type: mongoose.Schema.Types.ObjectId, ref: "Booking", required: true },
+    eventType: {
+      type: String,
+      required: true,
+      enum: ["booking_request", "booking_cancelled"],
+      default: "booking_request"
+    },
     tutor: { type: mongoose.Schema.Types.ObjectId, ref: "Tutor", required: true },
     student: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     studentName: { type: String, required: true, trim: true, maxlength: 80 },
@@ -16,6 +22,6 @@ const notificationSchema = new mongoose.Schema(
 );
 
 notificationSchema.index({ recipient: 1, createdAt: -1 });
-notificationSchema.index({ booking: 1 }, { unique: true });
+notificationSchema.index({ booking: 1, eventType: 1 }, { unique: true });
 
 export default mongoose.model("Notification", notificationSchema);

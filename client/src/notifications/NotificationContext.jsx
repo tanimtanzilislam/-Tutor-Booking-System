@@ -32,7 +32,11 @@ export function NotificationProvider({ children }) {
       const nextIds = new Set(result.notifications.map(({ _id }) => _id));
       if (previousIds.current) {
         const latest = result.notifications.find(({ _id }) => !previousIds.current.has(_id));
-        if (latest) notify(`${latest.studentName} booked a ${latest.subject} session.`);
+        if (latest?.eventType === "booking_cancelled") {
+          notify(`${latest.studentName} cancelled their ${latest.subject} session.`);
+        } else if (latest) {
+          notify(`${latest.studentName} booked a ${latest.subject} session.`);
+        }
       }
       previousIds.current = nextIds;
       setNotifications(result.notifications);
