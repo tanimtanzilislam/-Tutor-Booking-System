@@ -4,6 +4,7 @@ import Layout from "./components/Layout.jsx";
 import { Loading } from "./components/PageState.jsx";
 import AddTutorPage from "./pages/AddTutorPage.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
+import ErrorPage from "./pages/ErrorPage.jsx";
 import GoogleCallbackPage from "./pages/GoogleCallbackPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import MySessionsPage from "./pages/MySessionsPage.jsx";
@@ -36,6 +37,7 @@ export default function App() {
         <Route path="my-tutors" element={<Protected><MyTutorsPage /></Protected>} />
         <Route path="my-sessions" element={<Protected><MySessionsPage /></Protected>} />
         <Route path="profile" element={<Protected><ProfilePage /></Protected>} />
+        <Route path="error" element={<ErrorPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

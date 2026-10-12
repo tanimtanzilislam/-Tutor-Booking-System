@@ -3,5 +3,5 @@ export function ErrorMessage({ children }) {
 }
 
 export function Loading({ label = "Loading..." }) {
-  return <p className="loading-state" role="status">{label}</p>;
+  return <div className="loading-state" role="status"><span className="loading-spinner" aria-hidden="true" />{label}</div>;
 }

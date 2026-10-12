@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { api } from "../api.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { ErrorMessage, Loading } from "../components/PageState.jsx";
+import { useToast } from "../components/ToastContext.jsx";
 import { availableStarts } from "../utils/availability.js";
 
 const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -11,6 +12,7 @@ const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frida
 export default function TutorDetailsPage() {
   const { tutorId } = useParams();
   const { user } = useAuth();
+  const { notify } = useToast();
   const [tutor, setTutor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -60,8 +62,10 @@ export default function TutorDetailsPage() {
       setBookingStatus(result.booking.status);
       setStartsAt("");
       setTutor((current) => ({ ...current, totalSlots: result.booking.tutor.totalSlots }));
+      notify("Your session has been booked.");
     } catch (requestError) {
       setBookingError(requestError.message);
+      notify(requestError.message, "error");
       if (requestError.message === "No available slots left.") {
         setTutor((current) => ({ ...current, totalSlots: 0 }));
       }

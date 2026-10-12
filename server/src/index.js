@@ -31,5 +31,18 @@ app.use((error, _req, res, _next) => {
 });
 
 await mongoose.connect(MONGODB_URI);
+const bookingCollectionExists = await mongoose.connection.db
+  .listCollections({ name: Booking.collection.collectionName }, { nameOnly: true })
+  .toArray();
+if (bookingCollectionExists.length) {
+  const bookingIndexes = await Booking.collection.indexes();
+  const legacyBookingIndex = bookingIndexes.find(
+    (index) => index.name === "tutor_1_startsAt_1" && index.unique && !index.partialFilterExpression
+  );
+  if (legacyBookingIndex) {
+    await Booking.collection.dropIndex(legacyBookingIndex.name);
+  }
+  await Booking.updateMany({ status: "Confirmed" }, { $set: { status: "confirmed" } });
+}
 await Promise.all([User.init(), Booking.init()]);
 app.listen(PORT, () => console.log(`MediQueue API listening on port ${PORT}`));

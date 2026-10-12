@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { api } from "../api.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { ErrorMessage } from "../components/PageState.jsx";
+import { useToast } from "../components/ToastContext.jsx";
 
 function passwordValidationError(password) {
   if (password.length < 6) return "Password must be at least 6 characters.";
@@ -14,6 +15,7 @@ function passwordValidationError(password) {
 export default function AuthPage({ mode }) {
   const isRegister = mode === "register";
   const { user, signIn } = useAuth();
+  const { notify } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const [values, setValues] = useState({ name: "", email: "", password: "", profileImage: "" });
@@ -61,16 +63,15 @@ export default function AuthPage({ mode }) {
             password: values.password
           })
         });
-        navigate("/login", {
-          replace: true,
-          state: { notice: "Your account is ready. Log in to continue." }
-        });
+        notify("Your account is ready. Log in to continue.");
+        navigate("/login", { replace: true });
       } else {
         await signIn("/auth/login", values);
         navigate(location.state?.from || "/", { replace: true });
       }
     } catch (requestError) {
       setError(requestError.message);
+      notify(requestError.message, "error");
     } finally {
       setSubmitting(false);
     }

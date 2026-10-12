@@ -2,6 +2,10 @@
 
 MediQueue is a MERN tutor-booking application with a React/Vite client and an Express/Mongoose API.
 
+## Visual direction
+
+The interface uses an editorial learning-studio style: warm paper backgrounds, deep ink typography, teal and coral accents, consistent rounded buttons, and uniform image-led tutor cards. The shared layout and card grid adapt across desktop, tablet, and mobile widths.
+
 ## Requirements
 
 - Node.js 20 or newer
@@ -32,10 +36,14 @@ For local Google OAuth, register `http://localhost:5000/api/auth/google/callback
 - Authenticated tutor creation with photo URL, subject, institution, experience, location, teaching mode, hourly fee, session start date, total booking capacity, and weekly availability
 - One-hour bookings, checked against the tutor's recurring availability and existing bookings on the API
 - Private tutor-detail booking form with student and tutor details, validated phone number, generated booking status, and a remaining-capacity counter decremented on successful booking
+- A private booked-sessions table scoped to the signed-in student, with confirmed/cancelled status and confirmation before cancellation
+- Dynamic page titles, a not-found/error view, loading spinner, and operation toasts
 - A unique session token for every booking
 - Authenticated profile and booked-session pages
 
 Tutor availability is saved in the timezone of the tutor's browser when the tutor is added. Available booking times are displayed in the student's browser timezone. A booking is accepted only if it starts on the hour, falls within the tutor's weekly availability, is on or after the tutor's session start date, does not overlap another booking, and remaining total booking capacity is available. Capacity is decremented atomically after checks, and each available weekday's schedule repeats weekly from the session start date.
+
+Cancelling a confirmed booking changes its status and restores one remaining tutor booking slot. Cancelled bookings do not block the same tutor time from being booked again.
 
 `My Tutors` is an authenticated placeholder because no additional behavior for that page was specified.
 

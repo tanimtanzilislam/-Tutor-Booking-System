@@ -2,6 +2,7 @@ import { useState } from "react";
 import { DateTime } from "luxon";
 import { api } from "../api.js";
 import { ErrorMessage } from "../components/PageState.jsx";
+import { useToast } from "../components/ToastContext.jsx";
 
 const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const subjects = [
@@ -32,9 +33,9 @@ export default function AddTutorPage() {
   const [details, setDetails] = useState(initialDetails);
   const [availability, setAvailability] = useState([]);
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [photoPreviewFailed, setPhotoPreviewFailed] = useState(false);
+  const { notify } = useToast();
 
   function updateDetails(event) {
     setDetails((current) => ({ ...current, [event.target.name]: event.target.value }));
@@ -67,7 +68,6 @@ export default function AddTutorPage() {
     event.preventDefault();
     setSubmitting(true);
     setError("");
-    setMessage("");
 
     const availabilityError = validateAvailability();
     if (availabilityError) {
@@ -88,11 +88,12 @@ export default function AddTutorPage() {
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
         })
       });
-      setMessage(result.message || "Tutor added successfully.");
+      notify(result.message || "Tutor added successfully.");
       setDetails(initialDetails);
       setAvailability([]);
     } catch (requestError) {
       setError(requestError.message);
+      notify(requestError.message, "error");
     } finally {
       setSubmitting(false);
     }
@@ -160,7 +161,7 @@ export default function AddTutorPage() {
           </label>
           <label>
             Total booking slots
-            <input name="totalSlots" type="number" min="1" max="24" step="1" value={details.totalSlots} onChange={updateDetails} required />
+            <input name="totalSlots" type="number" min="1" step="1" value={details.totalSlots} onChange={updateDetails} required />
           </label>
         </div>
         <fieldset className="availability-editor">
@@ -186,7 +187,6 @@ export default function AddTutorPage() {
           })}
         </fieldset>
         <ErrorMessage>{error}</ErrorMessage>
-        {message && <p className="form-success" role="status">{message}</p>}
         <button className="button button-dark" type="submit" disabled={submitting}>
           {submitting ? "Saving..." : "Submit tutor"}
         </button>

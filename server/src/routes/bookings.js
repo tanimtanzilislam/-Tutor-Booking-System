@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { randomBytes } from "node:crypto";
+import mongoose from "mongoose";
 import Booking from "../models/Booking.js";
 import Tutor from "../models/Tutor.js";
 import User from "../models/User.js";
@@ -20,6 +21,49 @@ router.get("/mine", requireAuth, async (req, res, next) => {
       .populate("tutor", "name subject hourlyRate timeZone")
       .sort({ startsAt: 1 });
     return res.json({ bookings });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.patch("/:bookingId/cancel", requireAuth, async (req, res, next) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.bookingId)) {
+      return res.status(404).json({ message: "Booking not found." });
+    }
+    const booking = await Booking.findOneAndUpdate(
+      {
+        _id: req.params.bookingId,
+        student: req.userId,
+        status: { $nin: ["cancelled", "Cancelled"] }
+      },
+      { $set: { status: "cancelled" } },
+      { new: false, runValidators: true }
+    );
+    if (!booking) {
+      const ownedBooking = await Booking.findOne({ _id: req.params.bookingId, student: req.userId });
+      if (!ownedBooking) return res.status(404).json({ message: "Booking not found." });
+      return res.status(409).json({ message: "This booking has already been cancelled." });
+    }
+
+    try {
+      const capacityRestored = await Tutor.updateOne(
+        { _id: booking.tutor },
+        { $inc: { totalSlots: 1 } }
+      );
+      if (capacityRestored.matchedCount !== 1) {
+        throw new Error("The tutor capacity could not be restored for this cancellation.");
+      }
+    } catch (error) {
+      await Booking.updateOne(
+        { _id: booking._id, status: "cancelled" },
+        { $set: { status: booking.status } }
+      );
+      return next(error);
+    }
+    booking.status = "cancelled";
+    await booking.populate("tutor", "name subject hourlyRate timeZone");
+    return res.json({ booking, message: "Your session has been cancelled." });
   } catch (error) {
     return next(error);
   }
@@ -71,6 +115,7 @@ router.post("/", requireAuth, async (req, res, next) => {
 
     const possibleConflict = await Booking.findOne({
       tutor: tutor.id,
+      status: { $nin: ["cancelled", "Cancelled"] },
       startsAt: {
         $gt: new Date(start.getTime() - 60 * 60 * 1000),
         $lt: new Date(start.getTime() + 60 * 60 * 1000)
@@ -101,7 +146,7 @@ router.post("/", requireAuth, async (req, res, next) => {
         phone: normalizedPhone,
         startsAt: start,
         sessionToken: randomBytes(12).toString("hex").toUpperCase(),
-        status: "Confirmed"
+        status: "confirmed"
       });
     } catch (error) {
       await Tutor.updateOne({ _id: tutor._id }, { $inc: { totalSlots: 1 } });

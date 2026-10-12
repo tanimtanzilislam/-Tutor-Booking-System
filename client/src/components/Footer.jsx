@@ -23,7 +23,10 @@ export default function Footer() {
         </div>
         <div>
           <h2>Follow along</h2>
-          <span className="footer-muted">Social links coming soon</span>
+          <div className="social-placeholder">
+            <span className="social-x-mark" aria-label="X">𝕏</span>
+            <span>Social links coming soon</span>
+          </div>
         </div>
       </div>
       <div className="shell footer-bottom">

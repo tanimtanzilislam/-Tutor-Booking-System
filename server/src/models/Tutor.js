@@ -20,7 +20,7 @@ const tutorSchema = new mongoose.Schema(
     location: { type: String, required: true, trim: true, maxlength: 150 },
     teachingMode: { type: String, required: true, enum: ["Online", "Offline", "Both"] },
     hourlyRate: { type: Number, required: true, min: 0.01 },
-    totalSlots: { type: Number, required: true, min: 1, max: 24 },
+    totalSlots: { type: Number, required: true, min: 1 },
     sessionStartDate: { type: String, required: true, match: /^\d{4}-\d{2}-\d{2}$/ },
     timeZone: { type: String, required: true },
     availability: { type: [availabilitySchema], required: true }

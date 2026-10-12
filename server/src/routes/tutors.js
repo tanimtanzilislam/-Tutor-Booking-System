@@ -89,7 +89,7 @@ router.post("/", requireAuth, async (req, res, next) => {
       typeof location !== "string" || !location.trim() ||
       !Number.isFinite(yearsExperience) || yearsExperience < 0 || yearsExperience > 80 ||
       !Number.isFinite(rate) || rate <= 0 ||
-      !Number.isInteger(slotCount) || slotCount < 1 || slotCount > 24 ||
+      !Number.isSafeInteger(slotCount) || slotCount < 1 ||
       !["Online", "Offline", "Both"].includes(teachingMode)
     ) {
       return res.status(400).json({ message: "Complete all tutor details with valid hourly fee, experience, and total slots." });
