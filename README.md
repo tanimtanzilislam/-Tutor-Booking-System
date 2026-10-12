@@ -48,6 +48,7 @@ For local Google OAuth, register `http://localhost:5000/api/auth/google/callback
 - Dynamic page titles, a not-found/error view, loading spinner, and operation toasts
 - A unique session token for every booking
 - Authenticated profile and booked-session pages
+- Student and tutor account profile editing for name, email, and profile photo URL; account role cannot be changed from the profile form
 
 Tutor availability is saved in the timezone of the tutor's browser when the tutor is added. Available booking times are displayed in the student's browser timezone. Students can book in advance; the selected session must start on the hour, fall within the tutor's weekly availability, be on or after the tutor's session start date, not overlap another booking, and have remaining total booking capacity. Capacity is decremented atomically after checks, and each available weekday's schedule repeats weekly from the session start date.
 

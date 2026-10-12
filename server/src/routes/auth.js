@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import requireAuth from "../middleware/requireAuth.js";
 import { isValidRegistrationPassword } from "../passwordRules.js";
+import { validateProfilePayload } from "../profileValidation.js";
 
 const router = Router();
 
@@ -270,6 +271,35 @@ router.get("/me", requireAuth, async (req, res, next) => {
       }
     });
   } catch (error) {
+    return next(error);
+  }
+});
+
+router.patch("/me", requireAuth, async (req, res, next) => {
+  try {
+    const { error, value } = validateProfilePayload(req.body);
+    if (error) return res.status(400).json({ message: error });
+
+    const user = await User.findByIdAndUpdate(
+      req.userId,
+      { $set: value },
+      { new: true, runValidators: true, select: "name email profileImage role" }
+    );
+    if (!user) return res.status(401).json({ message: "Your account could not be found. Please log in again." });
+    return res.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        profileImage: user.profileImage,
+        role: user.role === "tutor" ? "tutor" : "student"
+      },
+      message: "Your profile has been updated."
+    });
+  } catch (error) {
+    if (error?.code === 11000) {
+      return res.status(409).json({ message: "An account with that email already exists." });
+    }
     return next(error);
   }
 });

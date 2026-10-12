@@ -44,6 +44,17 @@ export function AuthProvider({ children }) {
     return result.user;
   }
 
+  async function updateProfile(values) {
+    const result = await api("/auth/me", {
+      method: "PATCH",
+      body: JSON.stringify(values)
+    });
+    localStorage.setItem("mediqueue-user", JSON.stringify(result.user));
+    setUser(result.user);
+    setError("");
+    return result;
+  }
+
   const completeGoogleSignIn = useCallback(async (token) => {
     localStorage.setItem("mediqueue-token", token);
     try {
@@ -67,8 +78,8 @@ export function AuthProvider({ children }) {
   }
 
   const value = useMemo(
-    () => ({ user, loading, error, signIn, completeGoogleSignIn, signOut }),
-    [user, loading, error]
+    () => ({ user, loading, error, signIn, updateProfile, completeGoogleSignIn, signOut }),
+    [user, loading, error, updateProfile]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
