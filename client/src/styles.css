@@ -70,6 +70,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .notification-card p { margin: 10px 0 0; color: var(--muted); font-size: 13px; }
 .notification-card .notification-session-time { color: var(--ink); font-weight: 600; }
 .notification-created-at { display: block; margin-top: 9px; color: var(--muted); font-size: 11px; }
+.notification-student-profile { display: flex; align-items: center; gap: 11px; width: fit-content; min-width: min(100%, 300px); margin-top: 15px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: color-mix(in srgb, var(--paper) 75%, white); }
+.notification-student-profile img, .notification-student-avatar { width: 42px; height: 42px; flex: none; border-radius: 50%; object-fit: cover; }
+.notification-student-avatar { display: grid; place-items: center; background: var(--lime); color: var(--ink); font-weight: 700; }
+.notification-student-profile > div { display: grid; gap: 3px; }
+.notification-student-profile strong { color: var(--ink); font-size: 12px; }
+.notification-student-profile a { color: var(--green); font-size: 11px; text-decoration: none; }
+.notification-profile-label { color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.notification-booking-status { font-size: 11px !important; text-transform: capitalize; }
 .notification-actions { display: flex; flex: none; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .notification-actions .button { min-height: 38px; padding-inline: 12px; font-size: 11px; }
 
@@ -228,6 +236,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .booking-status { display: inline-flex; padding: 5px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: capitalize; }
 .status-confirmed { background: #eaf3e8; color: #397b5f; }
 .status-cancelled { background: #f7e9e7; color: #a33d33; }
+.status-pending { background: #fff3d6; color: #8a5d12; }
+.status-rejected { background: #f7e9e7; color: #a33d33; }
 .button-cancel { min-height: 36px; padding-inline: 12px; border-color: #ead3d0; background: #fff9f8; color: #9c3f35; font-size: 11px; }
 .button-cancel:hover { background: #fbecea; }
 .cancelled-label { color: var(--muted); font-size: 11px; }
@@ -935,6 +945,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 [data-theme="dark"] .availability-dot { background: #eab66d; }
 [data-theme="dark"] .booking-status.status-confirmed { background: #27423a; color: #9bd8bf; }
 [data-theme="dark"] .booking-status.status-cancelled { background: #492d2c; color: #ffad9b; }
+[data-theme="dark"] .notification-student-profile { border-color: var(--line); background: #202e34; }
+[data-theme="dark"] .notification-student-profile a { color: #a6cba9; }
+[data-theme="dark"] .status-pending { background: #483a20; color: #f3cc70; }
 [data-theme="dark"] .button-cancel { border-color: #704a46; background: #332424; color: #ffad9b; }
 [data-theme="dark"] .button-cancel:hover { background: #492d2c; }
 

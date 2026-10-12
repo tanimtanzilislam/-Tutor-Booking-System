@@ -77,21 +77,22 @@ export default function MySessionsPage() {
             <tbody>
               {bookings.map((booking) => {
                 const sessionDate = DateTime.fromISO(booking.startsAt).toLocal();
-                const isConfirmed = (booking.status || "confirmed").toLowerCase() === "confirmed";
+                const status = (booking.status || "confirmed").toLowerCase();
+                const canCancel = status === "pending" || status === "confirmed";
                 return (
                   <tr key={booking._id}>
                     <td data-label="Tutor">{booking.tutor?.name || "Tutor"}</td>
                     <td data-label="Student">{booking.studentName}</td>
                     <td data-label="Email">{booking.studentEmail}</td>
                     <td data-label="Session">{sessionDate.toLocaleString(DateTime.DATETIME_MED)}</td>
-                    <td data-label="Status"><span className={`booking-status ${isConfirmed ? "status-confirmed" : "status-cancelled"}`}>{booking.status || "confirmed"}</span></td>
+                    <td data-label="Status"><span className={`booking-status status-${status}`}>{status === "pending" ? "Awaiting tutor approval" : status}</span></td>
                     <td data-label="Session token"><code className="table-token">{booking.sessionToken}</code></td>
                     <td data-label="Actions">
-                      {isConfirmed ? (
+                      {canCancel ? (
                         <button className="button button-cancel" type="button" onClick={() => setBookingToCancel(booking)}>
                           Cancel
                         </button>
-                      ) : <span className="cancelled-label">Cancelled</span>}
+                      ) : <span className="cancelled-label">{status === "rejected" ? "Declined" : "Cancelled"}</span>}
                     </td>
                   </tr>
                 );
@@ -112,7 +113,7 @@ export default function MySessionsPage() {
           <section className="confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-title" aria-describedby="cancel-description" data-reveal>
             <p className="section-kicker">Please confirm</p>
             <h2 id="cancel-title">Cancel this session?</h2>
-            <p id="cancel-description">Your booking with {bookingToCancel.tutor?.name || "this tutor"} will be marked cancelled. Its booking slot will become available again.</p>
+            <p id="cancel-description">Your {bookingToCancel.status === "pending" ? "request" : "confirmed session"} with {bookingToCancel.tutor?.name || "this tutor"} will be cancelled. Its booking slot will become available again.</p>
             {error && <ErrorMessage>{error}</ErrorMessage>}
             <div className="confirmation-actions">
               <button className="button button-light" type="button" onClick={() => setBookingToCancel(null)} disabled={cancelling}>Keep session</button>

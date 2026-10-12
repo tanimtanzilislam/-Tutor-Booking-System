@@ -5,9 +5,9 @@ import { ErrorMessage, Loading } from "../components/PageState.jsx";
 import { useNotifications } from "../notifications/NotificationContext.jsx";
 
 export default function NotificationsPage() {
-  const { notifications, error, loading: initialLoading, refresh, markRead } = useNotifications();
+  const { notifications, error, loading: initialLoading, refresh, markRead, decideBooking } = useNotifications();
   const [loading, setLoading] = useState(false);
-  const [markingId, setMarkingId] = useState("");
+  const [actingId, setActingId] = useState("");
 
   async function reload() {
     setLoading(true);
@@ -18,12 +18,16 @@ export default function NotificationsPage() {
     }
   }
 
-  async function readNotification(id) {
-    setMarkingId(id);
+  async function runNotificationAction(id, action) {
+    setActingId(id);
     try {
-      await markRead(id);
+      if (action === "confirm" || action === "decline") {
+        await decideBooking(id, action);
+      } else {
+        await markRead(id);
+      }
     } finally {
-      setMarkingId("");
+      setActingId("");
     }
   }
 
@@ -44,6 +48,9 @@ export default function NotificationsPage() {
         <div className="notification-list">
           {notifications.map((notification) => {
             const sessionDate = DateTime.fromISO(notification.startsAt).toLocal();
+            const student = notification.student;
+            const bookingStatus = notification.booking?.status || "pending";
+            const bookingPending = bookingStatus === "pending";
             return (
               <article className={`notification-card ${notification.readAt ? "" : "notification-unread"}`} key={notification._id}>
                 <div className="notification-card-content">
@@ -56,20 +63,51 @@ export default function NotificationsPage() {
                     {sessionDate.setZone(notification.timeZone).toLocaleString(DateTime.DATETIME_MED_WITH_WEEKDAY)}
                     {" · "}{notification.timeZone}
                   </p>
+                  <div className="notification-student-profile">
+                    {student?.profileImage
+                      ? <img src={student.profileImage} alt={`${student.name} profile`} />
+                      : <span className="notification-student-avatar" aria-hidden="true">{(student?.name || notification.studentName).slice(0, 1).toUpperCase()}</span>}
+                    <div>
+                      <span className="notification-profile-label">Student profile</span>
+                      <strong>{student?.name || notification.studentName}</strong>
+                      {student?.email && <a href={`mailto:${student.email}`}>{student.email}</a>}
+                    </div>
+                  </div>
+                  <p className="notification-booking-status">
+                    Booking status: <strong>{bookingStatus}</strong>
+                  </p>
                   <span className="notification-created-at">
                     Received {DateTime.fromISO(notification.createdAt).toRelative() || "recently"}
                   </span>
                 </div>
                 <div className="notification-actions">
-                  <Link className="button button-outline" to={`/tutors/${notification.tutor}`}>View tutor profile</Link>
-                  {!notification.readAt && (
+                  {bookingPending ? (
+                    <>
+                      <button
+                        className="button button-outline"
+                        type="button"
+                        onClick={() => runNotificationAction(notification._id, "decline")}
+                        disabled={actingId === notification._id}
+                      >
+                        {actingId === notification._id ? "Please wait..." : "Decline request"}
+                      </button>
+                      <button
+                        className="button button-dark"
+                        type="button"
+                        onClick={() => runNotificationAction(notification._id, "confirm")}
+                        disabled={actingId === notification._id}
+                      >
+                        {actingId === notification._id ? "Please wait..." : "Confirm booking"}
+                      </button>
+                    </>
+                  ) : !notification.readAt && (
                     <button
                       className="button button-dark"
                       type="button"
-                      onClick={() => readNotification(notification._id)}
-                      disabled={markingId === notification._id}
+                      onClick={() => runNotificationAction(notification._id, "read")}
+                      disabled={actingId === notification._id}
                     >
-                      {markingId === notification._id ? "Marking..." : "Mark as read"}
+                      {actingId === notification._id ? "Marking..." : "Mark as read"}
                     </button>
                   )}
                 </div>

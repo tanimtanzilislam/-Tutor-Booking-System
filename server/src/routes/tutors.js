@@ -125,7 +125,7 @@ router.patch("/:tutorId", requireAuth, requireRole("tutor"), async (req, res, ne
 
     const confirmedBookings = await Booking.find({
       tutor: currentTutor._id,
-      status: { $nin: ["cancelled", "Cancelled"] }
+      status: { $in: ["pending", "confirmed"] }
     }).select("startsAt");
     const { availability, timeZone, sessionStartDate } = parsed.value;
     if (confirmedBookings.some(({ startsAt }) => (
@@ -163,7 +163,7 @@ router.delete("/:tutorId", requireAuth, requireRole("tutor"), async (req, res, n
 
     const confirmedBooking = await Booking.exists({
       tutor: currentTutor._id,
-      status: { $nin: ["cancelled", "Cancelled"] }
+      status: { $in: ["pending", "confirmed"] }
     });
     if (confirmedBooking) {
       return res.status(409).json({

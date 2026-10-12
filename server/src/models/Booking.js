@@ -9,14 +9,22 @@ const bookingSchema = new mongoose.Schema(
     phone: { type: String, required: true, trim: true, maxlength: 20 },
     startsAt: { type: Date, required: true },
     sessionToken: { type: String, required: true, unique: true },
-    status: { type: String, required: true, enum: ["confirmed", "cancelled"], default: "confirmed" }
+    status: {
+      type: String,
+      required: true,
+      enum: ["pending", "confirmed", "rejected", "cancelled"],
+      default: "pending"
+    }
   },
-  { timestamps: true }
+  { timestamps: true, autoIndex: false }
 );
 
 bookingSchema.index(
   { tutor: 1, startsAt: 1 },
-  { unique: true, partialFilterExpression: { status: "confirmed" } }
+  {
+    unique: true,
+    partialFilterExpression: { status: { $in: ["pending", "confirmed"] } }
+  }
 );
 
 export default mongoose.model("Booking", bookingSchema);

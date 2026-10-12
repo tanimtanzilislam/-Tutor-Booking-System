@@ -41,10 +41,10 @@ For local Google OAuth, register `http://localhost:5000/api/auth/google/callback
 - Tutor-only listing creation with photo URL, subject, institution, experience, location, teaching mode, hourly fee, session start date, total booking capacity, and weekly availability
 - A private My Tutors table for the signed-in user's own tutor listings, with full-field editing and confirmed removal
 - Tutor ownership checks on listing updates/removal; removal hides the profile while retaining booking history and is blocked while confirmed sessions exist
-- One-hour bookings, checked against the tutor's recurring availability and existing bookings on the API
-- Private tutor-detail booking form with student and tutor details, validated phone number, generated booking status, and a remaining-capacity counter decremented on successful booking
-- A private booked-sessions table scoped to the signed-in student, with confirmed/cancelled status and confirmation before cancellation
-- Persistent in-app tutor notifications for new student bookings, with an unread badge, periodic updates, and mark-as-read controls
+- Student booking requests remain pending until the tutor confirms or declines; requests are checked against recurring availability and existing bookings on the API
+- Private tutor-detail booking form with student and tutor details, validated phone number, generated session token, and a remaining-capacity counter reserved while approval is pending
+- A private booked-sessions table scoped to the signed-in student, with pending/confirmed/rejected/cancelled statuses and confirmation before cancellation
+- Persistent in-app tutor notifications with the student's profile, an unread badge, periodic updates, mark-as-read controls, and confirm/decline actions
 - Dynamic page titles, a not-found/error view, loading spinner, and operation toasts
 - A unique session token for every booking
 - Authenticated profile and booked-session pages
@@ -53,7 +53,7 @@ Tutor availability is saved in the timezone of the tutor's browser when the tuto
 
 Tutor session start dates are stored and returned as date-only values. Legacy MongoDB date values are normalized to their UTC calendar date when tutor profiles are returned or bookings are checked.
 
-Cancelling a confirmed booking changes its status and restores one remaining tutor booking slot. Cancelled bookings do not block the same tutor time from being booked again.
+Booking requests reserve one tutor slot while pending. Tutor confirmation keeps the reservation; tutor decline or student cancellation restores the slot. Pending and confirmed sessions prevent overlapping bookings, while rejected and cancelled bookings do not block the time.
 
 The homepage also includes subject exploration and session-preparation sections. Tutor cards link to their detail pages, where students can choose an available session and book it.
 

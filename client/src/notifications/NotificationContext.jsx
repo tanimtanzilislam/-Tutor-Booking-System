@@ -88,9 +88,32 @@ export function NotificationProvider({ children }) {
     }
   }, [notifications]);
 
+  const decideBooking = useCallback(async (notificationId, decision) => {
+    try {
+      const { notification, message } = await api(
+        `/notifications/${encodeURIComponent(notificationId)}/decision`,
+        { method: "PATCH", body: JSON.stringify({ decision }) }
+      );
+      const wasUnread = notifications.some((item) => item._id === notificationId && !item.readAt);
+      setNotifications((current) => current.map((item) => (
+        item._id === notification._id ? notification : item
+      )));
+      if (wasUnread && notification.readAt) {
+        setUnreadCount((current) => Math.max(0, current - 1));
+      }
+      setError("");
+      notify(message);
+      return true;
+    } catch (requestError) {
+      setError(requestError.message);
+      notify(requestError.message, "error");
+      return false;
+    }
+  }, [notifications, notify]);
+
   const value = useMemo(
-    () => ({ notifications, unreadCount, error, loading, refresh, markRead }),
-    [notifications, unreadCount, error, loading, refresh, markRead]
+    () => ({ notifications, unreadCount, error, loading, refresh, markRead, decideBooking }),
+    [notifications, unreadCount, error, loading, refresh, markRead, decideBooking]
   );
   return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;
 }

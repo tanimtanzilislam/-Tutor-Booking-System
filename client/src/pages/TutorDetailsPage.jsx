@@ -55,7 +55,7 @@ export default function TutorDetailsPage() {
       setBookingStatus(result.booking.status);
       setStartsAt("");
       setTutor((current) => ({ ...current, totalSlots: result.booking.tutor.totalSlots }));
-      notify("Your session has been booked.");
+      notify("Your booking request was sent to the tutor for approval.");
     } catch (requestError) {
       setBookingError(requestError.message);
       notify(requestError.message, "error");
@@ -159,7 +159,7 @@ export default function TutorDetailsPage() {
             <ErrorMessage>{bookingError}</ErrorMessage>
             {sessionToken && (
               <p className="form-success" role="status">
-                Session booked. Status: {bookingStatus}. Your token is <code className="inline-token">{sessionToken}</code>.{" "}
+                Booking request sent. Status: {bookingStatus}. Your token is <code className="inline-token">{sessionToken}</code>. The tutor must confirm before the session is booked.{" "}
                 {user?.role === "student" && <Link to="/my-sessions">View sessions</Link>}
               </p>
             )}

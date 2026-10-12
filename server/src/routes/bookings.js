@@ -37,7 +37,7 @@ router.patch("/:bookingId/cancel", requireAuth, requireRole("student"), async (r
       {
         _id: req.params.bookingId,
         student: req.userId,
-        status: { $nin: ["cancelled", "Cancelled"] }
+        status: { $in: ["pending", "confirmed"] }
       },
       { $set: { status: "cancelled" } },
       { new: false, runValidators: true }
@@ -45,7 +45,7 @@ router.patch("/:bookingId/cancel", requireAuth, requireRole("student"), async (r
     if (!booking) {
       const ownedBooking = await Booking.findOne({ _id: req.params.bookingId, student: req.userId });
       if (!ownedBooking) return res.status(404).json({ message: "Booking not found." });
-      return res.status(409).json({ message: "This booking has already been cancelled." });
+      return res.status(409).json({ message: "Only pending or confirmed bookings can be cancelled." });
     }
 
     try {
@@ -123,7 +123,7 @@ router.post("/", requireAuth, requireRole("student"), async (req, res, next) => 
 
     const possibleConflict = await Booking.findOne({
       tutor: tutor.id,
-      status: { $nin: ["cancelled", "Cancelled"] },
+      status: { $in: ["pending", "confirmed"] },
       startsAt: {
         $gt: new Date(start.getTime() - 60 * 60 * 1000),
         $lt: new Date(start.getTime() + 60 * 60 * 1000)
@@ -154,12 +154,13 @@ router.post("/", requireAuth, requireRole("student"), async (req, res, next) => 
         phone: normalizedPhone,
         startsAt: start,
         sessionToken: randomBytes(12).toString("hex").toUpperCase(),
-        status: "confirmed"
+        status: "pending"
       });
       await Notification.create({
         recipient: tutor.createdBy,
         booking: booking._id,
         tutor: tutor._id,
+        student: student._id,
         studentName: student.name,
         subject: tutor.subject,
         startsAt: start,
@@ -214,7 +215,7 @@ router.post("/", requireAuth, requireRole("student"), async (req, res, next) => 
       return next(new Error("The tutor booking reservation could not be finalized."));
     }
     await booking.populate("tutor", "name subject hourlyRate timeZone totalSlots");
-    return res.status(201).json({ booking });
+    return res.status(201).json({ booking, message: "Your booking request was sent to the tutor for approval." });
   } catch (error) {
     return next(error);
   }
